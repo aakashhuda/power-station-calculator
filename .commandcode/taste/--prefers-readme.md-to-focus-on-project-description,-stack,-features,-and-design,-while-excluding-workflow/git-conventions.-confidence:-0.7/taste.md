@@ -1,0 +1,19 @@
+# - Prefers README.md to focus on project description, stack, features, and design, while excluding workflow/git conventions. Confidence: 0.7
+- Prefers README.md to focus on project description, stack, features, and design, while excluding workflow/git conventions. Confidence: 0.7
+- Follows the project's design system document (e.g., DESIGN.md) faithfully when implementing UI. Confidence: 0.9
+- Honors documented features and constraints when building an application. Confidence: 0.7
+- Prefers numeric calculation results displayed with up to two decimal places rather than integers. Confidence: 0.7
+- Prefers utility-first UIs with no hero/banner section; the tool or calculations themselves should be the primary focus. Confidence: 0.8
+- Prefers modern, compact UI designs. Confidence: 0.8
+- Prefers clean, symmetrical layouts and dislikes clumsy or asymmetric placement. Confidence: 0.8
+- Prefers an explicit "clear all" control to reset devices and comparisons. Confidence: 0.8
+- Prefers exported/printed output (PDF) to be colorful and polished rather than plain monochrome, with colors preserved in print. Confidence: 0.8
+- Prefers a soothing, harmonious primary color palette that coordinates with the other UI colors rather than bold or aggressive accents. Confidence: 0.7
+- Prefers automatically computing derived values (e.g., runtime, recharge times) as inputs change instead of requiring an explicit "Calculate" button. Confidence: 0.8
+- Prefers vanilla JavaScript (no framework or build tooling) for frontend features when feasible. Confidence: 0.7
+- Prefers to skip optional or infeasible requests (e.g., browser-only page scraping blocked by CORS) rather than force a workaround, and wants infeasibility flagged explicitly. Confidence: 0.6
+- Prefers removing purely decorative, non-functional UI elements (e.g., a decorative header pseudo-element). Confidence: 0.6
+- Prefers explicit primary action buttons (e.g., "Generate comparison") over navigation links for triggering output generation. Confidence: 0.6
+- Prefers client-side form validation that blocks submission when any required field is invalid and shows an inline error message under the offending field. Confidence: 0.8
+- Prefers per-station (per-item) inputs for values that vary per station (e.g., AC and solar charging inputs) over shared global inputs, keeping only truly shared settings like derate factors global. Confidence: 0.6
+- Uses domain-accurate terminology in UI labels (e.g., power-station wall charging is "AC input", not "DC input"). Confidence: 0.6

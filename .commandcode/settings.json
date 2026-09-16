@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(node --check public/app.js)",
+      "Shell(python3 -m http.server 4173 --directory public >/tmp/psc_server.log 2>&1 & echo $! > /tmp/psc_server.pid sleep 1 for f in / /styles.css /app.js; do code=$(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:4173$f\") echo \"$f -> $code\" done curl -s http://127.0.0.1:4173/ | grep -c \"Google\\|fonts.googleapis\" | xargs echo \"External font refs:\" kill \"$(cat /tmp/psc_server.pid)\" 2>/dev/null; echo \"server stopped\")",
+      "Shell(echo:*)",
+      "Shell(python3 -m http.server 4174 --directory public >/tmp/psc_server2.log 2>&1 & echo $! > /tmp/psc_server2.pid sleep 1 for f in / /styles.css /app.js; do code=$(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:4174$f\") echo \"$f -> $code\" done kill \"$(cat /tmp/psc_server2.pid)\" 2>/dev/null; echo \"server stopped\" echo \"--- token check ---\" grep -c \"Oswald\\|JetBrains Mono\" public/styles.css | xargs echo \"font tokens:\" grep -c \"print-color-adjust\" public/styles.css | xargs echo \"print color-adjust:\" grep -c \"ff4136\\|FF4136\" public/styles.css public/index.html | xargs echo \"red occurrences:\" grep -c \"fonts.googleapis\" public/index.html | xargs echo \"font link:\")",
+      "Shell(sed:*)",
+      "Shell(sort:*)",
+      "Shell(python3 -m http.server 4175 --directory public >/tmp/psc_server3.log 2>&1 & echo $! > /tmp/psc_server3.pid sleep 1 for f in / /styles.css /app.js; do code=$(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:4175$f\") echo \"$f -> $code\" done kill \"$(cat /tmp/psc_server3.pid)\" 2>/dev/null; echo \"server stopped\" echo \"--- token check ---\" grep -c \"2a9d8f\\|2A9D8F\" public/styles.css DESIGN.md public/index.html | xargs echo \"teal occurrences:\" grep -c \"appbar::before\" public/styles.css | xargs echo \"appbar before (should be 0):\" grep -c \"station-dccharge\\|dc-factor\" public/app.js public/index.html | xargs echo \"dc refs:\")",
+      "Shell(python3 -m http.server 4176 --directory public >/tmp/psc_server4.log 2>&1 & echo $! > /tmp/psc_server4.pid sleep 1 for f in / /styles.css /app.js; do code=$(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:4176$f\") echo \"$f -> $code\" done kill \"$(cat /tmp/psc_server4.pid)\" 2>/dev/null; echo \"server stopped\" echo \"--- checks ---\" grep -c \"nav__link\\|<nav\" public/index.html | xargs echo \"nav refs in html:\" grep -c \"panel--factors\\|result-tile--ac\" public/styles.css | xargs echo \"renamed selectors:\")"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
