@@ -61,3 +61,4 @@ for him/her.
 
 - Follow the @DESIGN.md to design and develop the website.
 - Mobile layout is a must
+- Must be only one page
