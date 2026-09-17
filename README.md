@@ -25,9 +25,9 @@ It answers the four questions buyers most often ask: daily energy need, runtime,
 
 ## Design
 
-Follows `DESIGN.md`: a bold "Construtivismo Dinâmico Tech" aesthetic with geometric, constructivist color and type.
+Follows `DESIGN.md`: the "Hellotime" monochrome editorial system — flat surfaces, hairline borders, and one electric-blue gradient accent.
 
-- **Typography:** Oswald (JetBrains Mono for technical values).
-- **Palette:** soothing teal (#2A9D8F), electric blue (#0074D9), yellow (#FFDC00), lime green (#2ECC40), red (#FF4136) for errors, near-black (#1a1a1a), and gray (#AAAAAA).
-- **Layout:** compact single page with no hero; CSS Grid/Flexbox, geometric accents, and a colorful comparison table.
+- **Typography:** Inter (SF Pro substitute) with strong weight contrast.
+- **Palette:** near-monochrome — Ink (#151619), Smoke (#7f8491), Fog/Ash/Mist neutrals, Charcoal (#25272d) CTAs, Signal Green (#059669) brand mark, and an electric-blue gradient reserved for headline keywords.
+- **Layout:** flat, shadow-free single page with no hero; 16px-radius cards, generous whitespace, and a dark-header comparison table.
 - **Responsive:** mobile layout required; columns collapse below 900px/768px.

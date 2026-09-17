@@ -1,5 +1,5 @@
 - Prefers README.md to focus on project description, stack, features, and design, while excluding workflow/git conventions. Confidence: 0.7
-- Follows the project's design system document (e.g., DESIGN.md) faithfully when implementing UI. Confidence: 0.9
+- Follows the project's design system document (e.g., DESIGN.md) faithfully when implementing UI, re-reading and re-applying it when the document has been updated mid-project. Confidence: 0.9
 - Honors documented features and constraints when building an application. Confidence: 0.7
 - Prefers numeric calculation results displayed with up to two decimal places rather than integers. Confidence: 0.7
 - Prefers utility-first UIs with no hero/banner section; the tool or calculations themselves should be the primary focus. Confidence: 0.8
@@ -16,3 +16,5 @@
 - Prefers client-side form validation that blocks submission when any required field is invalid and shows an inline error message under the offending field. Confidence: 0.8
 - Prefers per-station (per-item) inputs for values that vary per station (e.g., AC and solar charging inputs) over shared global inputs, keeping only truly shared settings like derate factors global. Confidence: 0.6
 - Uses domain-accurate terminology in UI labels (e.g., power-station wall charging is "AC input", not "DC input"). Confidence: 0.6
+- Prefers visual redesigns to leave functionality untouched — markup classes and styles change, but element IDs and JS behavior stay stable. Confidence: 0.75
+- Grants latitude to go beyond the literal request for visual quality ("make it more beautiful and lively"); welcomes expressive styling, motion, and micro-interactions. Confidence: 0.65
