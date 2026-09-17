@@ -17,6 +17,15 @@
   var activeStationId = null;
   var toastTimer;
 
+  /* Comparison view state. Sort lives only in memory so a reload returns to the
+     neutral order; nothing here is persisted. */
+  var comparisonSort = { key: null, dir: 'asc' };
+  /* null means "follow the screen size": a table is the better desktop
+     comparison, a ranked list is the only workable one on a phone. Choosing a
+     view explicitly pins it. */
+  var compareView = null;
+  var rankedMetric = 'runtime';
+
   /* Bundled product catalog (public/catalog.js). Brands come from the Star Tech
      Bangladesh listings; AC input and solar input are not published there, so
      those two fields are always supplied by the user. */
@@ -28,6 +37,10 @@
   var catalogBrand = CATALOG.brands.length ? CATALOG.brands[0].name : '';
   var catalogQuery = '';
   var selectedProduct = null;
+
+  /* Non-null while the station modal is editing an existing station rather than
+     adding one. The two actions share one form so they cannot drift apart. */
+  var editingStationId = null;
 
   var stationModal = document.getElementById('station-modal');
   var openModalBtn = document.getElementById('open-station-modal');
@@ -48,7 +61,10 @@
   var priceInput = document.getElementById('station-price');
   var priceLabelEl = document.getElementById('station-price-label');
 
+  var modalTitleEl = document.getElementById('station-modal-title');
   var modalSubEl = document.getElementById('station-modal-sub');
+  var stationModeSeg = document.getElementById('station-mode-seg');
+  var stationSubmitLabel = document.getElementById('station-modal-submit-label');
   var modeCatalogBtn = document.getElementById('mode-catalog');
   var modeCustomBtn = document.getElementById('mode-custom');
   var catalogPanel = document.getElementById('catalog-panel');
@@ -97,12 +113,23 @@
     };
   }
 
+  /* Stations saved before these fields existed must keep working: an absent
+     `included` means "in the comparison", and an absent `priceCurrency` means
+     "same as the current display currency", which suppresses the mismatch warning
+     instead of inventing one. */
+  function normalizeStation(s) {
+    if (!s || typeof s !== 'object') return s;
+    if (s.included === undefined) s.included = true;
+    if (s.priceCurrency === undefined) s.priceCurrency = null;
+    return s;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       var data = raw ? JSON.parse(raw) : null;
       if (data && typeof data === 'object') {
-        stations = Array.isArray(data.stations) ? data.stations : [];
+        stations = Array.isArray(data.stations) ? data.stations.map(normalizeStation) : [];
         devices = Array.isArray(data.devices) && data.devices.length
           ? data.devices.map(normalizeDevice)
           : [blankDevice()];
@@ -172,9 +199,36 @@
     return CURRENCY_SYMBOLS[currency] || CURRENCY_SYMBOLS.Tk;
   }
 
-  function priceLabel(price) {
-    if (typeof price !== 'number' || !isFinite(price)) return '—';
-    return currencySymbol() + fmt(price);
+  /* Prices are read at a glance and compared, so they get thousands grouping
+     (`৳82,500`). Measured values keep using fmt(), whose trailing-zero trimming
+     matters for Wh/W figures. */
+  function fmtPrice(value) {
+    if (typeof value !== 'number' || !isFinite(value)) return '—';
+    return Number(value.toFixed(2)).toLocaleString('en-US');
+  }
+
+  function priceLabelFor(station) {
+    if (typeof station.price !== 'number' || !isFinite(station.price)) return '—';
+    return symbolFor(station.priceCurrency) + fmtPrice(station.price);
+  }
+
+  function symbolFor(code) {
+    return CURRENCY_SYMBOLS[code] || CURRENCY_SYMBOLS[currency];
+  }
+
+  /* Stations carry the currency their price was typed in. Without this, switching
+     the selector relabels every stored number — a BDT 82500 would render as
+     $82500 — and the comparison would rank prices that are not comparable. */
+  function priceCurrencies() {
+    var seen = {};
+    includedStations().forEach(function (s) {
+      if (typeof s.price === 'number' && isFinite(s.price)) seen[s.priceCurrency || currency] = true;
+    });
+    return Object.keys(seen);
+  }
+
+  function hasMixedCurrencies() {
+    return priceCurrencies().length > 1;
   }
 
   function deviceQty(d) {
@@ -185,6 +239,24 @@
 
   function getActiveStation() {
     return stations.find(function (s) { return s.id === activeStationId; }) || null;
+  }
+
+  /* A station the user has kept out of the comparison still shows its own results;
+     it just does not take part in the table or the Best marks. */
+  function includedStations() {
+    return stations.filter(function (s) { return s.included !== false; });
+  }
+
+  /* Derived comparison metrics. Both reuse numbers already on screen: the same
+     0.85 inverter factor as runtime, and the daily need every station shares. */
+  function coverageDays(station) {
+    if (!(dailyTotals.totalWh > 0) || !(station.capacityWh > 0)) return null;
+    return (station.capacityWh * 0.85) / dailyTotals.totalWh;
+  }
+
+  function pricePerWh(station) {
+    if (!(station.capacityWh > 0) || typeof station.price !== 'number' || !isFinite(station.price)) return null;
+    return station.price / station.capacityWh;
   }
 
   function countDone(station) {
@@ -234,6 +306,11 @@
   function iconWarn(size) {
     size = size || 14;
     return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>';
+  }
+
+  function iconEdit(size) {
+    size = size || 14;
+    return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>';
   }
 
   function iconTrash() {
@@ -319,6 +396,8 @@
       acChargeW: data.acChargeW,
       solarChargeW: data.solarChargeW,
       price: data.price,
+      priceCurrency: currency,
+      included: true,
       catalogId: data.catalogId || null,
       calcs: {
         runtime: { done: false, loadWatts: null, hours: 0 },
@@ -526,20 +605,59 @@
     (missingField || stationSubmitBtn).focus();
   }
 
+  function editingStation() {
+    if (!editingStationId) return null;
+    return stations.find(function (s) { return s.id === editingStationId; }) || null;
+  }
+
+  /* True when the station's saved price is already in the currency the price
+     field is labelled with. A price from another currency must not be copied
+     into the field, or it would silently be re-labelled on save. */
+  function priceMatchesDisplayCurrency(station) {
+    if (typeof station.price !== 'number' || !isFinite(station.price)) return true;
+    return !station.priceCurrency || station.priceCurrency === currency;
+  }
+
+  /* One place decides the title, the subtitle, the submit label and which parts
+     of the body are visible, for both the add and the edit action. */
+  function setModalChrome() {
+    var station = editingStation();
+    var editing = !!station;
+    var usingCatalog = !editing && formMode === 'catalog' && catalogBrands().length > 0;
+
+    modalTitleEl.textContent = editing ? 'Edit Power Station' : 'Add Power Station';
+    stationSubmitLabel.textContent = editing ? 'Save Changes' : 'Add Station';
+
+    /* The catalog picker replaces every field, which would discard the station
+       being edited, so it is only offered while adding. */
+    stationModeSeg.hidden = editing;
+    catalogPanel.hidden = !usingCatalog;
+
+    if (editing) {
+      var sub = 'Change any spec — the results and the comparison update when you save.';
+      if (!priceMatchesDisplayCurrency(station)) {
+        sub += ' The saved price is in ' + (station.priceCurrency || 'another currency') +
+          ', so the price field is blank to avoid relabelling it.';
+      }
+      modalSubEl.textContent = sub;
+      return;
+    }
+
+    modalSubEl.textContent = usingCatalog
+      ? 'Pick a model and its specs are filled in, or enter them yourself.'
+      : 'Enter the specs from the manufacturer sheet.';
+  }
+
   function setFormMode(mode) {
     formMode = mode === 'custom' ? 'custom' : 'catalog';
     var usingCatalog = formMode === 'catalog' && catalogBrands().length > 0;
 
-    catalogPanel.hidden = !usingCatalog;
     modeCatalogBtn.classList.toggle('is-active', usingCatalog);
     modeCustomBtn.classList.toggle('is-active', !usingCatalog);
     modeCatalogBtn.setAttribute('aria-selected', usingCatalog ? 'true' : 'false');
     modeCustomBtn.setAttribute('aria-selected', usingCatalog ? 'false' : 'true');
-    modalSubEl.textContent = usingCatalog
-      ? 'Pick a model and its specs are filled in, or enter them yourself.'
-      : 'Enter the specs from the manufacturer sheet.';
 
-    if (!usingCatalog) {
+    if (!usingCatalog && !editingStation()) {
       selectedProduct = null;
       addForm.reset();
       clearAddErrors();
@@ -547,11 +665,13 @@
       renderCatalogList();
       renderCatalogNote();
     }
+    setModalChrome();
   }
 
   /* ---------- Station modal ---------- */
 
   function openStationModal() {
+    editingStationId = null;
     stationModal.hidden = false;
     document.body.classList.add('is-modal-open');
 
@@ -571,6 +691,33 @@
     }
   }
 
+  /* Loads the station into the same form the add action uses. */
+  function openEditStationModal(id) {
+    var station = stations.find(function (s) { return s.id === id; });
+    if (!station) return;
+
+    editingStationId = id;
+    stationModal.hidden = false;
+    document.body.classList.add('is-modal-open');
+
+    selectedProduct = null;
+    addForm.reset();
+    clearAddErrors();
+    resetCatalogSearch();
+
+    nameInput.value = station.name || '';
+    brandInput.value = station.brand || '';
+    capacityInput.value = num(station.capacityWh);
+    outputInput.value = num(station.continuousOutputW);
+    acChargeInput.value = num(station.acChargeW);
+    solarChargeInput.value = num(station.solarChargeW);
+    priceInput.value = priceMatchesDisplayCurrency(station) ? num(station.price) : '';
+
+    setModalChrome();
+    nameInput.focus();
+    nameInput.select();
+  }
+
   function closeStationModal(reset) {
     stationModal.hidden = true;
     document.body.classList.remove('is-modal-open');
@@ -579,6 +726,8 @@
       clearAddErrors();
       resetCatalogSearch();
       selectedProduct = null;
+      editingStationId = null;
+      setModalChrome();
     }
   }
 
@@ -603,8 +752,35 @@
       stationContent.innerHTML = '';
     }
 
+    updateCompareCta();
     renderComparison();
     renderPrintReport();
+  }
+
+  /* The nav button says what it will actually do: how many stations are in the
+     running, not a promise to "generate" something already computed. */
+  function updateCompareCta() {
+    var n = includedStations().length;
+    var label = n ? 'Compare (' + n + ')' : 'Compare';
+    var long = generateCompareBtn.querySelector('.btn__label--long');
+    var short = generateCompareBtn.querySelector('.btn__label--short');
+    if (long) long.textContent = label;
+    if (short) short.textContent = label;
+  }
+
+  /* Send the user to whatever is actually blocking the comparison. */
+  function gotoMissing(stationId, field) {
+    if (field === 'devices') {
+      document.getElementById('calculator').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var first = deviceRows.querySelector('input[data-field="name"]');
+      if (first) first.focus();
+      return;
+    }
+    if (stationId) {
+      activeStationId = stationId;
+      render();
+    }
+    stationsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderStationTabs() {
@@ -613,7 +789,7 @@
       var active = s.id === activeStationId ? 'is-active' : '';
       return '<button type="button" class="tab ' + active + '" data-station="' + esc(s.id) + '" role="tab" aria-selected="' + (s.id === activeStationId) + '">' +
         '<span>' + esc(s.name) + '</span>' +
-        '<span class="tab__count">' + done + '/' + CALC_IDS.length + '</span>' +
+        '<span class="tab__count' + (done === CALC_IDS.length ? '' : ' tab__count--todo') + '">' + done + '/' + CALC_IDS.length + '</span>' +
         '<span class="tab__remove" data-remove-station="' + esc(s.id) + '" aria-label="Delete ' + esc(s.name) + '">' + iconX() + '</span>' +
         '</button>';
     }).join('');
@@ -625,6 +801,10 @@
         if (e.target.closest('[data-remove-station]')) return;
         activeStationId = tab.dataset.station;
         render();
+        /* Only on an explicit tab change — render() also runs on every keystroke,
+           and re-scrolling then would yank the page while the user is typing. */
+        var active = stationTabs.querySelector('.tab.is-active');
+        if (active) active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       });
     });
 
@@ -656,14 +836,18 @@
   function stationSummaryHTML(station) {
     var done = countDone(station);
     var pct = Math.round(done / CALC_IDS.length * 100);
+    var days = coverageDays(station);
+    var perWh = pricePerWh(station);
     var metrics = [
       ['Brand', station.brand || '—'],
       ['Capacity', fmt(station.capacityWh) + ' Wh'],
       ['Output', fmt(station.continuousOutputW) + ' W'],
       ['AC Input', fmt(station.acChargeW) + ' W'],
       ['Solar Input', fmt(station.solarChargeW) + ' W'],
-      ['Price', priceLabel(station.price)]
+      ['Price', priceLabelFor(station)]
     ];
+    if (days !== null) metrics.push(['Coverage', fmt(days) + (displayNumber(days) === 1 ? ' day' : ' days')]);
+    if (perWh !== null) metrics.push(['Price / Wh', symbolFor(station.priceCurrency) + fmtPrice(perWh)]);
     var tiles = metrics.map(function (m) {
       return '<div class="metric">' +
         '<span class="metric__label">' + esc(m[0]) + '</span>' +
@@ -673,6 +857,14 @@
     return '<div class="station-summary">' +
       '<div class="station-summary__grid">' + tiles + '</div>' +
       '<div class="progress" aria-hidden="true"><div class="progress__bar" style="width:' + pct + '%"></div></div>' +
+      '<div class="station-summary__actions">' +
+      '<label class="shortlist">' +
+      '<input type="checkbox" data-include="' + esc(station.id) + '"' + (station.included !== false ? ' checked' : '') + '>' +
+      '<span>Include in comparison</span>' +
+      '</label>' +
+      '<button type="button" class="btn btn--ghost btn--sm" data-edit-station="' + esc(station.id) + '">' +
+      iconEdit() + 'Edit Specs</button>' +
+      '</div>' +
       '</div>';
   }
 
@@ -723,21 +915,163 @@
 
   /* ---------- Comparison ---------- */
 
+  /* One definition per column drives both the header buttons and the body cells,
+     so a column's label, its sort key and its bar can never drift apart.
+     `bar` is only set on metrics where a longer bar means better — barring the
+     recharge times would draw "best" as the shortest bar and misread badly. */
+  var COMPARE_COLUMNS = [
+    { key: 'name', label: 'Power Station', sortable: false },
+    { key: 'price', label: 'Price', sortable: true, better: 'low' },
+    { key: 'perWh', label: 'Price / Wh', sortable: true, better: 'low' },
+    { key: 'capacity', label: 'Capacity', sortable: true, better: 'high', bar: true },
+    { key: 'coverage', label: 'Coverage', sortable: true, better: 'high', bar: true },
+    { key: 'runtime', label: 'Runtime', sortable: true, better: 'high', bar: true, best: true },
+    { key: 'solar', label: 'Solar Recharge', sortable: true, better: 'low', best: true },
+    { key: 'ac', label: 'AC Recharge', sortable: true, better: 'low', best: true }
+  ];
+
+  var RANK_METRICS = [
+    { key: 'runtime', label: 'Runtime', better: 'high' },
+    { key: 'coverage', label: 'Coverage', better: 'high' },
+    { key: 'capacity', label: 'Capacity', better: 'high' },
+    { key: 'solar', label: 'Solar', better: 'low' },
+    { key: 'ac', label: 'AC', better: 'low' },
+    { key: 'price', label: 'Price', better: 'low' }
+  ];
+
+  var BEST_KEYS = [
+    { key: 'runtime', better: 'high' },
+    { key: 'solar', better: 'low' },
+    { key: 'ac', better: 'low' }
+  ];
+
+  function compareValue(station, key) {
+    switch (key) {
+      case 'price': return typeof station.price === 'number' && isFinite(station.price) ? station.price : null;
+      case 'perWh': return pricePerWh(station);
+      case 'capacity': return station.capacityWh > 0 ? station.capacityWh : null;
+      case 'coverage': return coverageDays(station);
+      case 'runtime': return station.calcs.runtime.done ? station.calcs.runtime.hours : null;
+      case 'solar': return station.calcs.solar.done ? station.calcs.solar.hours : null;
+      case 'ac': return station.calcs.ac.done ? station.calcs.ac.hours : null;
+      default: return null;
+    }
+  }
+
+  /* What the cell actually prints, at fmt()'s two-decimal precision. */
+  function displayNumber(value) {
+    return value === null || value === undefined ? null : Number(value.toFixed(2));
+  }
+
+  function compareText(station, key) {
+    var value = compareValue(station, key);
+    if (value === null) return '—';
+    switch (key) {
+      case 'price': return priceLabelFor(station);
+      case 'perWh': return symbolFor(station.priceCurrency) + fmtPrice(value);
+      case 'capacity': return fmt(value) + ' Wh';
+      case 'coverage': return fmt(value) + (displayNumber(value) === 1 ? ' day' : ' days');
+      default: return fmt(value) + ' h';
+    }
+  }
+
+  /* Best is decided on the printed value, not the raw float: comparing raw hours
+     let two stations both display "8.7 h" with only one of them badged. */
   function bestValues() {
-    if (stations.length < 2) return {};
-    var best = { runtime: -Infinity, solar: Infinity, ac: Infinity };
-    stations.forEach(function (s) {
-      if (s.calcs.runtime.done) best.runtime = Math.max(best.runtime, s.calcs.runtime.hours);
-      if (s.calcs.solar.done) best.solar = Math.min(best.solar, s.calcs.solar.hours);
-      if (s.calcs.ac.done) best.ac = Math.min(best.ac, s.calcs.ac.hours);
+    var list = includedStations();
+    if (list.length < 2) return {};
+    var best = {};
+    BEST_KEYS.forEach(function (spec) {
+      var values = list.map(function (s) { return displayNumber(compareValue(s, spec.key)); })
+        .filter(function (v) { return v !== null; });
+      if (!values.length) return;
+      best[spec.key] = spec.better === 'high'
+        ? Math.max.apply(null, values)
+        : Math.min.apply(null, values);
     });
     return best;
   }
 
-  function bestCell(value, unit, isBest, label) {
-    return isBest
-      ? '<td class="is-best" data-label="' + label + '"><span class="best-badge" title="Best">' + value + ' ' + unit + '</span></td>'
-      : '<td data-label="' + label + '">' + value + ' ' + unit + '</td>';
+  function isBestCell(station, key, best) {
+    var value = displayNumber(compareValue(station, key));
+    return value !== null && best[key] !== undefined && value === best[key];
+  }
+
+  /* Bar scales, one per barrable column. A column where every station ties gets
+     no scale at all, so nothing renders as a row of identical full-width bars. */
+  function barScales() {
+    var scales = {};
+    COMPARE_COLUMNS.filter(function (col) { return col.bar; }).forEach(function (col) {
+      var values = includedStations().map(function (s) { return compareValue(s, col.key); })
+        .filter(function (v) { return typeof v === 'number' && isFinite(v) && v > 0; });
+      if (values.length < 2) return;
+      var max = Math.max.apply(null, values);
+      if (!(max > Math.min.apply(null, values))) return;
+      scales[col.key] = max;
+    });
+    return scales;
+  }
+
+  function barHTML(station, key, max) {
+    var value = compareValue(station, key);
+    if (!(max > 0) || !(value > 0)) return '';
+    var pct = Math.max(3, Math.round(value / max * 100));
+    return '<span class="compare-bar" aria-hidden="true">' +
+      '<span class="compare-bar__fill" style="width:' + pct + '%"></span></span>';
+  }
+
+  function sortedIncludedStations() {
+    var list = includedStations().slice();
+    var key = comparisonSort.key;
+    if (!key) return list;
+    var dir = comparisonSort.dir === 'desc' ? -1 : 1;
+    return list
+      .map(function (s, index) { return { station: s, index: index }; })
+      .sort(function (a, b) {
+        var av = compareValue(a.station, key);
+        var bv = compareValue(b.station, key);
+        /* Blanks sink to the bottom whichever way the column is pointing —
+           reversing them would put "—" rows on top, which reads as "best". */
+        if (av === null && bv === null) return a.index - b.index;
+        if (av === null) return 1;
+        if (bv === null) return -1;
+        if (av === bv) return a.index - b.index;
+        return (av - bv) * dir;
+      })
+      .map(function (entry) { return entry.station; });
+  }
+
+  function compareHeadHTML() {
+    var cells = COMPARE_COLUMNS.map(function (col) {
+      if (!col.sortable) return '<th scope="col">' + esc(col.label) + '</th>';
+      var active = comparisonSort.key === col.key;
+      var state = active ? (comparisonSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+      return '<th scope="col" aria-sort="' + state + '">' +
+        '<button type="button" class="compare-sort' + (active ? ' is-active' : '') + '" data-sort="' + col.key + '">' +
+        esc(col.label) +
+        '<span class="compare-sort__arrow" aria-hidden="true">' + (active ? (comparisonSort.dir === 'asc' ? '↑' : '↓') : '↕') + '</span>' +
+        '</button></th>';
+    }).join('');
+    return '<thead><tr>' + cells + '</tr></thead>';
+  }
+
+  function compareRowHTML(station, best, scales) {
+    var cells = COMPARE_COLUMNS.map(function (col) {
+      if (col.key === 'name') {
+        return '<td data-label="Power Station" class="compare-station">' +
+          '<span class="compare-station__name">' + esc(station.name) + '</span>' +
+          '<span class="compare-station__brand">' + esc(station.brand || '—') + '</span>' +
+          '</td>';
+      }
+      var text = compareText(station, col.key);
+      var marked = col.best && isBestCell(station, col.key, best);
+      var bar = scales[col.key] ? barHTML(station, col.key, scales[col.key]) : '';
+      return '<td data-label="' + esc(col.label) + '"' + (marked ? ' class="is-best"' : '') + '>' +
+        (marked ? '<span class="best-badge" title="Best">' + text + '</span>' : text) +
+        bar +
+        '</td>';
+    }).join('');
+    return '<tr>' + cells + '</tr>';
   }
 
   // Daily need is identical for every station, so it sits above the table
@@ -752,55 +1086,179 @@
       '</div>';
   }
 
-  function renderComparison() {
-    var total = stations.length * CALC_IDS.length;
-    var doneCount = 0;
-    stations.forEach(function (s) { doneCount += countDone(s); });
+  /* Stations stamped with different currencies cannot be ranked against each
+     other, and inventing an exchange rate would be worse than saying so. */
+  function mixedCurrencyHTML() {
+    if (!hasMixedCurrencies()) return '';
+    return '<p class="compare-warn">' + iconWarn() + ' These stations have prices in different currencies (' +
+      priceCurrencies().join(', ') + '), so price and Price / Wh are not directly comparable.</p>';
+  }
 
+  function compareTableHTML() {
+    var list = sortedIncludedStations();
+    var best = bestValues();
+    var scales = barScales();
+    var rows = list.map(function (s) { return compareRowHTML(s, best, scales); }).join('');
+    return '<div class="compare-table-wrap"><table class="compare-table">' +
+      compareHeadHTML() + '<tbody>' + rows + '</tbody></table></div>';
+  }
+
+  /* ---------- Mobile ranked comparison ---------- */
+
+  function isNarrow() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  /* The ranked list is offered on every screen size. Until the user picks a view
+     explicitly, a narrow screen leads with the ranking (a stack of station cards
+     cannot be compared) and a wide one leads with the table. */
+  function resolvedCompareView() {
+    return compareView || (isNarrow() ? 'ranked' : 'specs');
+  }
+
+  function rankControlsHTML() {
+    var view = resolvedCompareView();
+    var metrics = RANK_METRICS.map(function (m) {
+      return '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
+        '" data-metric="' + m.key + '">' + esc(m.label) + '</button>';
+    }).join('');
+    return '<div class="compare-rank__controls">' +
+      '<div class="seg seg--view" role="tablist" aria-label="Comparison view">' +
+      '<button type="button" class="seg__btn' + (view === 'ranked' ? ' is-active' : '') + '" data-view="ranked" role="tab" aria-selected="' + (view === 'ranked') + '">Ranked</button>' +
+      '<button type="button" class="seg__btn' + (view === 'specs' ? ' is-active' : '') + '" data-view="specs" role="tab" aria-selected="' + (view === 'specs') + '">All Specs</button>' +
+      '</div>' +
+      '<div class="rank-picks" role="group" aria-label="Rank by">' + metrics + '</div>' +
+      '</div>';
+  }
+
+  /* Always rendered; CSS decides whether the card is currently showing it. */
+  function rankedHTML() {
+    var metric = RANK_METRICS.filter(function (m) { return m.key === rankedMetric; })[0] || RANK_METRICS[0];
+    var list = includedStations().filter(function (s) { return compareValue(s, metric.key) !== null; });
+
+    if (!list.length) {
+      return '<div class="compare-rank"><p class="compare-check__lead">Nothing to rank yet — ' +
+        esc(metric.label.toLowerCase()) + ' is unavailable for the included stations.</p></div>';
+    }
+
+    list.sort(function (a, b) {
+      var av = compareValue(a, metric.key);
+      var bv = compareValue(b, metric.key);
+      return metric.better === 'high' ? bv - av : av - bv;
+    });
+
+    var values = list.map(function (s) { return compareValue(s, metric.key); });
+    var max = Math.max.apply(null, values);
+    var showBars = max > Math.min.apply(null, values);
+    var best = bestValues();
+
+    var rows = list.map(function (s, i) {
+      var value = compareValue(s, metric.key);
+      var marked = BEST_KEYS.some(function (b) { return b.key === metric.key; }) && isBestCell(s, metric.key, best);
+      var bar = showBars
+        ? '<span class="compare-bar" aria-hidden="true"><span class="compare-bar__fill" style="width:' +
+          Math.max(3, Math.round(value / max * 100)) + '%"></span></span>'
+        : '';
+      return '<li class="rank">' +
+        '<div class="rank__top">' +
+        '<span class="rank__pos">' + (i + 1) + '</span>' +
+        '<span class="rank__name">' + esc(s.name) + '</span>' +
+        '<span class="rank__value' + (marked ? ' is-best' : '') + '">' + compareText(s, metric.key) + '</span>' +
+        '</div>' +
+        '<div class="rank__brand">' + esc(s.brand || '—') + '</div>' +
+        bar +
+        '</li>';
+    }).join('');
+
+    return '<div class="compare-rank"><ol class="rank-list">' + rows + '</ol></div>';
+  }
+
+  /* ---------- Locked state ---------- */
+
+  function compareChecklistHTML() {
+    var noDevices = !(dailyTotals.totalWatts > 0);
+    var items = [];
+
+    if (noDevices) {
+      items.push('<li class="check">' +
+        '<span class="check__body"><span class="check__what">Daily Energy Consumption</span>' +
+        '<span class="check__why">Add at least one device — runtime needs a total load.</span></span>' +
+        '<button type="button" class="btn btn--ghost btn--sm" data-goto-field="devices">Go</button>' +
+        '</li>');
+    }
+
+    includedStations().forEach(function (s) {
+      var missing = [];
+      if (!s.calcs.runtime.done && !noDevices) missing.push('capacity');
+      if (!s.calcs.solar.done) missing.push('solar input');
+      if (!s.calcs.ac.done) missing.push('AC input');
+      if (!missing.length) return;
+      var field = !s.calcs.ac.done ? 'station-accharge' : (!s.calcs.solar.done ? 'station-solarcharge' : 'station-capacity');
+      items.push('<li class="check">' +
+        '<span class="check__body"><span class="check__what">' + esc(s.name) + '</span>' +
+        '<span class="check__why">Needs ' + esc(missing.join(' and ')) + '.</span></span>' +
+        '<button type="button" class="btn btn--ghost btn--sm" data-goto-station="' + esc(s.id) + '" data-goto-field="' + field + '">Go</button>' +
+        '</li>');
+    });
+
+    if (!items.length) return '';
+
+    return '<div class="compare-check">' +
+      '<p class="compare-check__lead">Still needed before the comparison unlocks:</p>' +
+      '<ul class="check-list">' + items.join('') + '</ul>' +
+      '</div>';
+  }
+
+  function renderComparison() {
     if (stations.length === 0) {
       compareHint.textContent = 'Add a power station and complete the shared inputs to generate the comparison.';
-      compareArea.innerHTML = '<div class="compare-locked">Your comparison table will appear here.</div>';
+      compareArea.innerHTML = '<div class="compare-empty">' +
+        '<h3>How the comparison works</h3>' +
+        '<ol class="compare-steps">' +
+        '<li>List the devices you want to run, so every station is judged against the same load.</li>' +
+        '<li>Add two or more power stations — pick them from the catalog and the specs are filled in.</li>' +
+        '<li>Once each station has its inputs, the side-by-side table appears here and can be saved as a PDF.</li>' +
+        '</ol></div>';
       return;
     }
 
-    if (doneCount === total) {
-      compareHint.textContent = 'All inputs complete — here is the side-by-side summary.';
-      compareArea.innerHTML = comparisonTableHTML();
-      document.getElementById('download-pdf').addEventListener('click', function () {
-        window.print();
-      });
-    } else {
-      compareHint.textContent = 'Complete every station\'s calculations to generate the table (' + doneCount + '/' + total + ' complete).';
-      compareArea.innerHTML = '<div class="compare-locked">Add devices, plus AC and solar inputs for each station to generate the table.</div>';
+    var list = includedStations();
+
+    if (!list.length) {
+      compareHint.textContent = 'Every station is currently excluded from the comparison.';
+      compareArea.innerHTML = '<div class="compare-locked">Include at least one station from its summary to build the comparison.</div>';
+      return;
     }
+
+    var complete = list.every(function (s) { return countDone(s) === CALC_IDS.length; });
+
+    if (!complete) {
+      var total = list.length * CALC_IDS.length;
+      var doneCount = 0;
+      list.forEach(function (s) { doneCount += countDone(s); });
+      compareHint.textContent = 'Complete every station\'s inputs to generate the table (' + doneCount + '/' + total + ' complete).';
+      compareArea.innerHTML = '<div class="compare-locked">' + compareChecklistHTML() + '</div>';
+      return;
+    }
+
+    compareHint.textContent = list.length > 1
+      ? 'All inputs complete — here is the side-by-side summary.'
+      : 'Add a second station to see a side-by-side comparison.';
+
+    compareArea.innerHTML = comparisonCardHTML();
   }
 
-  function comparisonTableHTML() {
-    var head = '<thead><tr>' +
-      '<th>Power Station</th><th>Brand</th><th>Price</th><th>Capacity</th><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th>' +
-      '</tr></thead>';
-
-    var best = bestValues();
-
-    var rows = stations.map(function (s) {
-      return '<tr>' +
-        '<td data-label="Power Station">' + esc(s.name) + '</td>' +
-        '<td data-label="Brand">' + esc(s.brand || '—') + '</td>' +
-        '<td data-label="Price">' + priceLabel(s.price) + '</td>' +
-        '<td data-label="Capacity">' + fmt(s.capacityWh) + ' Wh</td>' +
-        bestCell(fmt(s.calcs.runtime.hours), 'h', s.calcs.runtime.hours === best.runtime, 'Runtime') +
-        bestCell(fmt(s.calcs.solar.hours), 'h', s.calcs.solar.hours === best.solar, 'Solar Recharge') +
-        bestCell(fmt(s.calcs.ac.hours), 'h', s.calcs.ac.hours === best.ac, 'AC Recharge') +
-        '</tr>';
-    }).join('');
-
-    return '<div class="compare-card">' +
+  function comparisonCardHTML() {
+    return '<div class="compare-card' + (resolvedCompareView() === 'ranked' ? ' is-rank' : ' is-specs') + '">' +
       '<div class="compare-card__head">' +
-      '<div><h3>Comparison Table</h3><p class="compare-note">Longest runtime and shortest recharge times are marked "Best". Choose "Save as PDF" in the print dialog to download.</p></div>' +
+      '<div><h3>Comparison</h3><p class="compare-note">Rank by any metric — longest runtime and shortest recharge times are marked "Best". Choose "Save as PDF" in the print dialog to download.</p></div>' +
       '<button type="button" class="btn btn--primary" id="download-pdf">Download PDF</button>' +
       '</div>' +
       dailyNeedHTML() +
-      '<div class="compare-table-wrap"><table class="compare-table">' + head + '<tbody>' + rows + '</tbody></table></div>' +
+      mixedCurrencyHTML() +
+      rankControlsHTML() +
+      compareTableHTML() +
+      rankedHTML() +
       '</div>';
   }
 
@@ -855,7 +1313,7 @@
       '<td>' + fmt(s.continuousOutputW) + ' W</td>' +
       '<td>' + fmt(s.acChargeW) + ' W</td>' +
       '<td>' + fmt(s.solarChargeW) + ' W</td>' +
-      '<td>' + priceLabel(s.price) + '</td>' +
+      '<td>' + priceLabelFor(s) + '</td>' +
       '</tr></tbody></table>' +
       '<table class="report-table">' +
       '<thead><tr><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th></tr></thead>' +
@@ -1023,19 +1481,93 @@
     guidelineCloseBtn.addEventListener('click', closeGuideline);
 
     generateCompareBtn.addEventListener('click', function () {
-      if (stations.length === 0) {
+      var list = includedStations();
+      if (!list.length) {
         showToast('Add a power station first');
         document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
         return;
       }
-      var total = stations.length * CALC_IDS.length;
-      var done = stations.reduce(function (n, s) { return n + countDone(s); }, 0);
-      if (done === total) {
-        document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
-      } else {
-        showToast('Complete all inputs to generate the comparison');
-        document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+      var missing = list.filter(function (s) { return countDone(s) !== CALC_IDS.length; });
+      if (missing.length) {
+        showToast(missing.length === 1
+          ? missing[0].name + ' still needs input — see the checklist'
+          : missing.length + ' stations still need input — see the checklist');
       }
+      document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    /* One delegated listener for everything the comparison renders, so no
+       per-render binding accumulates as the table is rebuilt on every keystroke. */
+    compareArea.addEventListener('click', function (e) {
+      var sortBtn = e.target.closest('[data-sort]');
+      if (sortBtn) {
+        var key = sortBtn.dataset.sort;
+        var col = COMPARE_COLUMNS.filter(function (c) { return c.key === key; })[0];
+        if (comparisonSort.key === key) {
+          comparisonSort.dir = comparisonSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          comparisonSort.key = key;
+          /* Open on the useful end: cheapest first, longest first. */
+          comparisonSort.dir = col && col.better === 'low' ? 'asc' : 'desc';
+        }
+        renderComparison();
+        var again = compareArea.querySelector('[data-sort="' + key + '"]');
+        if (again) again.focus();
+        return;
+      }
+
+      var viewBtn = e.target.closest('[data-view]');
+      if (viewBtn) {
+        /* An explicit choice pins the view and stops it tracking the screen size. */
+        compareView = viewBtn.dataset.view === 'specs' ? 'specs' : 'ranked';
+        renderComparison();
+        var viewAgain = compareArea.querySelector('[data-view="' + compareView + '"]');
+        if (viewAgain) viewAgain.focus();
+        return;
+      }
+
+      var metricBtn = e.target.closest('[data-metric]');
+      if (metricBtn) {
+        rankedMetric = metricBtn.dataset.metric;
+        renderComparison();
+        var metricAgain = compareArea.querySelector('[data-metric="' + rankedMetric + '"]');
+        if (metricAgain) metricAgain.focus();
+        return;
+      }
+
+      var goBtn = e.target.closest('[data-goto-field]');
+      if (goBtn) {
+        gotoMissing(goBtn.dataset.gotoStation, goBtn.dataset.gotoField);
+        return;
+      }
+
+      if (e.target.closest('#download-pdf')) window.print();
+    });
+
+    stationContent.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-edit-station]');
+      if (btn) openEditStationModal(btn.dataset.editStation);
+    });
+
+    /* While the view is still automatic, crossing the breakpoint has to swap it.
+       A pinned choice is left alone. */
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      if (compareView) return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(renderComparison, 150);
+    });
+
+    /* Shortlist toggle lives in the station summary. */
+    stationContent.addEventListener('change', function (e) {
+      var box = e.target.closest('[data-include]');
+      if (!box) return;
+      var station = stations.find(function (s) { return s.id === box.dataset.include; });
+      if (!station) return;
+      station.included = box.checked;
+      save();
+      render();
+      showToast(box.checked ? station.name + ' added to the comparison' : station.name + ' removed from the comparison');
     });
 
     clearAllBtn.addEventListener('click', function () {
@@ -1082,7 +1614,8 @@
 
       if (!valid) return;
 
-      var station = createStation({
+      var existing = editingStation();
+      var station = existing || createStation({
         name: name,
         brand: brand,
         capacityWh: capacityWh,
@@ -1093,13 +1626,31 @@
         catalogId: formMode === 'catalog' && selectedProduct ? selectedProduct.id : null
       });
 
-      stations.push(station);
-      activeStationId = station.id;
+      station.name = name;
+      station.brand = brand;
+      station.capacityWh = capacityWh;
+      station.continuousOutputW = continuousOutputW;
+      station.acChargeW = acChargeW;
+      station.solarChargeW = solarChargeW;
+      station.price = price;
+      /* Whatever was typed sits under a field labelled in the display currency,
+         so that is the currency it is in. Clearing the price clears the stamp. */
+      station.priceCurrency = price === null ? null : currency;
+
+      if (existing) {
+        /* id, catalogId, included and calcs are left alone; recomputeAll refreshes
+           the results from the new specs. */
+        activeStationId = existing.id;
+      } else {
+        stations.push(station);
+        activeStationId = station.id;
+      }
+
       recomputeAll();
       save();
       closeStationModal(true);
       render();
-      showToast('Power station added');
+      showToast(existing ? 'Power station updated' : 'Power station added');
     });
   }
 

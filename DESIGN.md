@@ -22,6 +22,20 @@ Hellotime is a near-monochrome productivity surface: white canvas, near-black ty
 | Signal Green  | `#059669`                                                       | Brand logo accent stroke, brand identity marker — vivid green checkmark against monochrome                  |
 | Electric Blue | `linear-gradient(90deg, #0560fd 0%, #3a8dff 50%, #c3d9ff 100%)` | Brand accent — the gradient highlight on hero keywords; also product UI project bars and chart accents      |
 
+### Application UI note — the Best marker
+
+The calculator is the product UI this system describes, and it spends the entire accent
+budget on a single element: the **"Best" marker**, a Signal Green (#059669) pill on the
+longest runtime and the shortest recharge times in the comparison table.
+
+This is a deliberate, narrow exception to "do not use colour for status or state". It is
+justified because the comparison is the one place where the user must spot a winner across
+a dense numeric grid, and weight alone is not enough at 14px. Everything else in the app
+stays monochrome: the load-status line, the catalog "Added" tag, the incomplete-tab pill
+and the mixed-currency warning all communicate through Mist washes, Charcoal fills, Pewter
+borders and type weight. Magnitude bars use the Electric Blue gradient — the sanctioned
+chart accent — and never encode status, only "more".
+
 ## Typography
 
 ### SF Pro Display — Headlines and display — used at 80px/700 for the hero, 48–64px/600–700 for section titles, 24–40px/500–600 for subheadings. Weight 700 at extreme size is the signature: massive bold sans against empty white space carries all the visual weight that color would on other sites.

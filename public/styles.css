@@ -874,7 +874,10 @@ img {
 }
 
 .compare-table-wrap {
-  overflow-x: auto;
+  /* Own scroll area: the sticky header then needs no viewport/nav offset, and a
+     long list keeps its column names without scrolling the whole page. */
+  max-height: min(70vh, 620px);
+  overflow: auto;
   border-radius: var(--r-input);
 }
 
@@ -893,6 +896,9 @@ img {
 }
 
 .compare-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -947,6 +953,8 @@ img {
   font-weight: 700;
 }
 
+/* The single sanctioned accent moment: Signal Green is spent here and nowhere
+   else in the app, per the design-system note in DESIGN.md. */
 .best-badge {
   display: inline-block;
   padding: 3px 12px;
@@ -956,6 +964,336 @@ img {
   color: var(--paper);
   background: var(--green);
   border-radius: var(--r-pill);
+}
+
+/* ---------- Comparison: sorting, bars, checklist, ranked view ---------- */
+
+.compare-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* The dark header inverts the global focus ring, so it gets its own. */
+.compare-sort:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.compare-sort__arrow {
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.compare-sort.is-active .compare-sort__arrow {
+  opacity: 1;
+}
+
+.compare-sort:hover .compare-sort__arrow {
+  opacity: 1;
+}
+
+.compare-station {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compare-station__name {
+  font-weight: 600;
+}
+
+.compare-station__brand {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--smoke);
+}
+
+/* Magnitude, not status: a longer bar always means "more", and bars are only
+   used on the columns where more is better. */
+.compare-bar {
+  display: block;
+  height: 4px;
+  margin-top: 7px;
+  background: var(--ash);
+  border-radius: var(--r-bar);
+  overflow: hidden;
+}
+
+.compare-bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--grad);
+  border-radius: var(--r-bar);
+  transform-origin: left center;
+  animation: bar-grow 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.compare-warn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--mist);
+  border: 1px solid var(--fog);
+  border-radius: var(--r-input);
+}
+
+.compare-empty {
+  padding: 32px;
+  background: var(--paper);
+  border: 1px solid var(--fog);
+  border-radius: var(--r-card);
+}
+
+.compare-empty h3 {
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.compare-steps {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--graphite);
+}
+
+.compare-check__lead {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--graphite);
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--fog);
+  border-radius: var(--r-input);
+}
+
+.check__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.check__what {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.check__why {
+  font-size: 13px;
+  color: var(--smoke);
+}
+
+/* The ranked view is offered at every width. It is hidden by default and the
+   card's is-rank / is-specs class decides which of the two views is showing. */
+.compare-rank {
+  display: none;
+}
+
+.compare-card.is-rank .compare-rank {
+  display: block;
+}
+
+.compare-card.is-rank .compare-table-wrap {
+  display: none;
+}
+
+/* The metric picker only drives the ranked list, so it is pointless in table view. */
+.compare-card.is-specs .rank-picks {
+  display: none;
+}
+
+.seg--view {
+  flex-shrink: 1;
+  margin-bottom: 10px;
+}
+
+.rank-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.rank-pick {
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--graphite);
+  background: var(--paper);
+  border: 1px solid var(--fog);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
+}
+
+.rank-pick:hover {
+  background: var(--mist);
+  border-color: var(--pewter);
+}
+
+.rank-pick.is-active {
+  color: var(--paper);
+  background: var(--charcoal);
+  border-color: var(--charcoal);
+}
+
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank {
+  padding: 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--fog);
+  border-radius: var(--r-input);
+}
+
+.rank__top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.rank__pos {
+  min-width: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--smoke);
+}
+
+.rank__name {
+  margin-right: auto;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.rank__value {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank__value.is-best {
+  padding: 2px 10px;
+  font-size: 13px;
+  color: var(--paper);
+  background: var(--green);
+  border-radius: var(--r-pill);
+}
+
+.rank__brand {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--smoke);
+}
+
+/* Station summary actions: shortlist on the left, edit on the right. */
+.station-summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.shortlist {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--graphite);
+  cursor: pointer;
+}
+
+.compare-rank__controls {
+  margin-bottom: 16px;
+}
+
+.rank-picks:last-child {
+  margin-bottom: 0;
+}
+
+.shortlist input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--charcoal);
+  cursor: pointer;
+}
+
+/* An incomplete station gets a bordered count instead of a filled one, so the
+   tabs read as "needs attention" without introducing a status colour. */
+.tab__count--todo {
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--pewter);
+}
+
+.tab.is-active .tab__count--todo {
+  color: var(--paper);
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare-bar__fill {
+    animation: none;
+  }
 }
 
 /* ---------- Station modal ---------- */
@@ -1269,10 +1607,12 @@ body.is-modal-open {
   border-radius: var(--r-pill);
 }
 
+/* Monochrome by policy: DESIGN.md reserves colour for one accent moment per
+   screen, and that budget is spent on the "Best" marker. */
 .pcard__tag--added {
   color: var(--paper);
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--charcoal);
+  border-color: var(--charcoal);
 }
 
 .guideline h3 {
@@ -1436,6 +1776,15 @@ body.is-modal-open {
 
   .compare-table-wrap {
     overflow: visible;
+    max-height: none;
+  }
+
+  .compare-rank__controls {
+    margin-bottom: 4px;
+  }
+
+  .check {
+    align-items: flex-start;
   }
 
   .compare-table {
@@ -1738,7 +2087,7 @@ body.is-modal-open {
     margin: 0;
     font-size: 11px;
     font-weight: 600;
-    color: #059669;
+    color: #7f8491;
   }
 
   .report-station__status--warn {
@@ -1748,6 +2097,32 @@ body.is-modal-open {
   .compare-card {
     padding: 0;
     border: none;
+  }
+
+  /* The PDF is a document, not a control surface: no ranked view, no metric
+     picker, no view switch, and the long table breaks across pages instead of
+     scrolling inside a box. */
+  .compare-table-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .compare-rank,
+  .compare-rank__controls {
+    display: none !important;
+  }
+
+  /* Whatever view the screen is showing, the PDF always gets the table. */
+  .compare-card.is-rank .compare-table-wrap {
+    display: block !important;
+  }
+
+  .compare-sort__arrow {
+    display: none;
+  }
+
+  .compare-bar {
+    display: none;
   }
 
   /* Daily need stays above the table in the PDF too, in place of the old column. */
