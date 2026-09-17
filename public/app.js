@@ -5,14 +5,26 @@
 
   var CALC_IDS = ['runtime', 'solar', 'ac'];
 
+  var CURRENCY_SYMBOLS = { Tk: '৳', USD: '$', GBP: '£', EUR: '€' };
+
   var stations = [];
-  var devices = [{ name: '', watts: '', hours: '' }];
+  var devices = [blankDevice()];
   var solarFactor = 1.2;
   var acFactor = 1.1;
+  var currency = 'Tk';
   var dailyTotals = { totalWh: 0, totalWatts: 0, deviceCount: 0 };
 
   var activeStationId = null;
   var toastTimer;
+
+  var stationModal = document.getElementById('station-modal');
+  var openModalBtn = document.getElementById('open-station-modal');
+  var cancelModalBtn = document.getElementById('station-modal-cancel');
+
+  var guidelineModal = document.getElementById('guideline-modal');
+  var openGuidelineBtn = document.getElementById('open-guideline');
+  var guidelineMask = guidelineModal.querySelector('.modal__mask');
+  var guidelineCloseBtn = document.getElementById('guideline-close');
 
   var addForm = document.getElementById('add-station-form');
   var nameInput = document.getElementById('station-name');
@@ -22,12 +34,14 @@
   var acChargeInput = document.getElementById('station-accharge');
   var solarChargeInput = document.getElementById('station-solarcharge');
   var priceInput = document.getElementById('station-price');
+  var priceLabelEl = document.getElementById('station-price-label');
 
   var deviceRows = document.getElementById('device-rows');
   var addDeviceBtn = document.getElementById('add-device');
   var dailyWattsEl = document.getElementById('daily-watts');
   var dailyWhEl = document.getElementById('daily-wh');
 
+  var currencyInput = document.getElementById('currency');
   var solarFactorInput = document.getElementById('solar-factor');
   var acFactorInput = document.getElementById('ac-factor');
 
@@ -38,11 +52,26 @@
   var stationContent = document.getElementById('station-content');
   var compareHint = document.getElementById('compare-hint');
   var compareArea = document.getElementById('compare-area');
+  var printReport = document.getElementById('print-report');
   var toast = document.getElementById('toast');
   var clearAllBtn = document.getElementById('clear-all');
   var generateCompareBtn = document.getElementById('generate-compare');
 
   /* ---------- Persistence ---------- */
+
+  function blankDevice() {
+    return { name: '', watts: '', hours: '', qty: '' };
+  }
+
+  function normalizeDevice(d) {
+    d = d && typeof d === 'object' ? d : {};
+    return {
+      name: d.name == null ? '' : d.name,
+      watts: d.watts == null ? '' : d.watts,
+      hours: d.hours == null ? '' : d.hours,
+      qty: d.qty == null ? '' : d.qty
+    };
+  }
 
   function load() {
     try {
@@ -50,17 +79,21 @@
       var data = raw ? JSON.parse(raw) : null;
       if (data && typeof data === 'object') {
         stations = Array.isArray(data.stations) ? data.stations : [];
-        devices = Array.isArray(data.devices) && data.devices.length ? data.devices : [{ name: '', watts: '', hours: '' }];
+        devices = Array.isArray(data.devices) && data.devices.length
+          ? data.devices.map(normalizeDevice)
+          : [blankDevice()];
         solarFactor = typeof data.solarFactor === 'number' && isFinite(data.solarFactor) ? data.solarFactor : 1.2;
         acFactor = typeof data.acFactor === 'number' && isFinite(data.acFactor) ? data.acFactor : 1.1;
+        currency = CURRENCY_SYMBOLS[data.currency] ? data.currency : 'Tk';
         return;
       }
     } catch (e) { /* ignore */ }
 
     stations = [];
-    devices = [{ name: '', watts: '', hours: '' }];
+    devices = [blankDevice()];
     solarFactor = 1.2;
     acFactor = 1.1;
+    currency = 'Tk';
   }
 
   function save() {
@@ -69,7 +102,8 @@
         stations: stations,
         devices: devices,
         solarFactor: solarFactor,
-        acFactor: acFactor
+        acFactor: acFactor,
+        currency: currency
       }));
     } catch (e) { /* storage full or unavailable */ }
   }
@@ -95,9 +129,34 @@
     return typeof value === 'number' && isFinite(value) ? fmt(value) : '';
   }
 
+  function parseNum(value) {
+    if (typeof value === 'number') return isFinite(value) ? value : NaN;
+    var s = String(value == null ? '' : value).trim();
+    if (!/^(?:\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    var n = parseFloat(s);
+    return isFinite(n) ? n : NaN;
+  }
+
+  function isInvalidNumber(field, raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (s === '') return false;
+    var pattern = field === 'qty' ? /^\d+$/ : /^(?:\d+\.?\d*|\.\d+)$/;
+    return !pattern.test(s);
+  }
+
+  function currencySymbol() {
+    return CURRENCY_SYMBOLS[currency] || CURRENCY_SYMBOLS.Tk;
+  }
+
   function priceLabel(price) {
     if (typeof price !== 'number' || !isFinite(price)) return '—';
-    return '$' + fmt(price);
+    return currencySymbol() + fmt(price);
+  }
+
+  function deviceQty(d) {
+    var s = String(d.qty == null ? '' : d.qty).trim();
+    var q = /^\d+$/.test(s) ? parseInt(s, 10) : 1;
+    return q >= 1 ? q : 1;
   }
 
   function getActiveStation() {
@@ -154,7 +213,7 @@
   }
 
   function iconTrash() {
-    return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>';
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>';
   }
 
   function iconX() {
@@ -168,11 +227,12 @@
     var totalWatts = 0;
     var deviceCount = 0;
     devices.forEach(function (d) {
-      var w = parseFloat(d.watts);
-      var h = parseFloat(d.hours);
+      var w = parseNum(d.watts);
+      var h = parseNum(d.hours);
       if (isFinite(w) && w > 0 && isFinite(h) && h > 0) {
-        totalWatts += w;
-        totalWh += w * h;
+        var q = deviceQty(d);
+        totalWatts += w * q;
+        totalWh += w * h * q;
         deviceCount++;
       }
     });
@@ -243,6 +303,23 @@
     };
   }
 
+  /* ---------- Station modal ---------- */
+
+  function openStationModal() {
+    stationModal.hidden = false;
+    document.body.classList.add('is-modal-open');
+    nameInput.focus();
+  }
+
+  function closeStationModal(reset) {
+    stationModal.hidden = true;
+    document.body.classList.remove('is-modal-open');
+    if (reset) {
+      addForm.reset();
+      clearAddErrors();
+    }
+  }
+
   /* ---------- Rendering ---------- */
 
   function render() {
@@ -265,6 +342,7 @@
     }
 
     renderComparison();
+    renderPrintReport();
   }
 
   function renderStationTabs() {
@@ -320,8 +398,8 @@
       ['Brand', station.brand || '—'],
       ['Capacity', fmt(station.capacityWh) + ' Wh'],
       ['Output', fmt(station.continuousOutputW) + ' W'],
-      ['AC input', fmt(station.acChargeW) + ' W'],
-      ['Solar input', fmt(station.solarChargeW) + ' W'],
+      ['AC Input', fmt(station.acChargeW) + ' W'],
+      ['Solar Input', fmt(station.solarChargeW) + ' W'],
       ['Price', priceLabel(station.price)]
     ];
     var tiles = metrics.map(function (m) {
@@ -368,20 +446,37 @@
   function solarTileHTML(station) {
     var c = station.calcs.solar;
     if (!c.done) {
-      return tileHTML('solar', 'Solar recharge', '—', '', 'Add solar input', '');
+      return tileHTML('solar', 'Solar Recharge', '—', '', 'Add solar input', '');
     }
-    return tileHTML('solar', 'Solar recharge', fmt(c.hours), 'hours', fmt(station.solarChargeW) + ' W solar × ' + fmt(solarFactor), '');
+    return tileHTML('solar', 'Solar Recharge', fmt(c.hours), 'hours', fmt(station.solarChargeW) + ' W solar × ' + fmt(solarFactor), '');
   }
 
   function acTileHTML(station) {
     var c = station.calcs.ac;
     if (!c.done) {
-      return tileHTML('ac', 'AC recharge', '—', '', 'Add AC input', '');
+      return tileHTML('ac', 'AC Recharge', '—', '', 'Add AC input', '');
     }
-    return tileHTML('ac', 'AC recharge', fmt(c.hours), 'hours', fmt(station.acChargeW) + ' W AC × ' + fmt(acFactor), '');
+    return tileHTML('ac', 'AC Recharge', fmt(c.hours), 'hours', fmt(station.acChargeW) + ' W AC × ' + fmt(acFactor), '');
   }
 
   /* ---------- Comparison ---------- */
+
+  function bestValues() {
+    if (stations.length < 2) return {};
+    var best = { runtime: -Infinity, solar: Infinity, ac: Infinity };
+    stations.forEach(function (s) {
+      if (s.calcs.runtime.done) best.runtime = Math.max(best.runtime, s.calcs.runtime.hours);
+      if (s.calcs.solar.done) best.solar = Math.min(best.solar, s.calcs.solar.hours);
+      if (s.calcs.ac.done) best.ac = Math.min(best.ac, s.calcs.ac.hours);
+    });
+    return best;
+  }
+
+  function bestCell(value, unit, isBest) {
+    return isBest
+      ? '<td class="is-best"><span class="best-badge" title="Best">' + value + ' ' + unit + '</span></td>'
+      : '<td>' + value + ' ' + unit + '</td>';
+  }
 
   function renderComparison() {
     var total = stations.length * CALC_IDS.length;
@@ -408,28 +503,96 @@
 
   function comparisonTableHTML() {
     var head = '<thead><tr>' +
-      '<th>Power Station</th><th>Brand</th><th>Price</th><th>Capacity (Wh)</th><th>Daily Need (Wh)</th><th>Runtime (h)</th><th>Solar (h)</th><th>AC (h)</th>' +
+      '<th>Power Station</th><th>Brand</th><th>Price</th><th>Capacity</th><th>Daily Need</th><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th>' +
       '</tr></thead>';
+
+    var best = bestValues();
 
     var rows = stations.map(function (s) {
       return '<tr>' +
         '<td>' + esc(s.name) + '</td>' +
         '<td>' + esc(s.brand || '—') + '</td>' +
         '<td>' + priceLabel(s.price) + '</td>' +
-        '<td>' + fmt(s.capacityWh) + '</td>' +
-        '<td>' + fmt(dailyTotals.totalWh) + '</td>' +
-        '<td>' + fmt(s.calcs.runtime.hours) + '</td>' +
-        '<td>' + fmt(s.calcs.solar.hours) + '</td>' +
-        '<td>' + fmt(s.calcs.ac.hours) + '</td>' +
+        '<td>' + fmt(s.capacityWh) + ' Wh</td>' +
+        '<td>' + fmt(dailyTotals.totalWh) + ' Wh</td>' +
+        bestCell(fmt(s.calcs.runtime.hours), 'h', s.calcs.runtime.hours === best.runtime) +
+        bestCell(fmt(s.calcs.solar.hours), 'h', s.calcs.solar.hours === best.solar) +
+        bestCell(fmt(s.calcs.ac.hours), 'h', s.calcs.ac.hours === best.ac) +
         '</tr>';
     }).join('');
 
     return '<div class="compare-card">' +
       '<div class="compare-card__head">' +
-      '<div><h3>Comparison Table</h3><p class="compare-note">Choose "Save as PDF" in the print dialog to download.</p></div>' +
+      '<div><h3>Comparison Table</h3><p class="compare-note">Longest runtime and shortest recharge times are marked "Best". Choose "Save as PDF" in the print dialog to download.</p></div>' +
       '<button type="button" class="btn btn--primary" id="download-pdf">Download PDF</button>' +
       '</div>' +
       '<div class="compare-table-wrap"><table class="compare-table">' + head + '<tbody>' + rows + '</tbody></table></div>' +
+      '</div>';
+  }
+
+  /* ---------- Print report ---------- */
+
+  function renderPrintReport() {
+    var hasData = stations.length > 0 || dailyTotals.deviceCount > 0;
+    if (!hasData) {
+      printReport.innerHTML = '';
+      return;
+    }
+
+    var html = '<h1 class="print-report__title">Power Station Report</h1>';
+    html += '<p class="print-report__date">Generated on ' + new Date().toLocaleDateString() + ' · Currency: ' + esc(currency) + ' (' + currencySymbol() + ')</p>';
+
+    html += '<h2 class="print-report__h2">Daily Energy Consumption</h2>';
+    var deviceRowsHTML = devices.map(function (d) {
+      var w = parseNum(d.watts);
+      var h = parseNum(d.hours);
+      if (!isFinite(w) || w <= 0 || !isFinite(h) || h <= 0) return '';
+      var q = deviceQty(d);
+      return '<tr>' +
+        '<td>' + esc(d.name || 'Unnamed device') + '</td>' +
+        '<td>' + fmt(q) + '</td>' +
+        '<td>' + fmt(w) + ' W</td>' +
+        '<td>' + fmt(h) + ' h</td>' +
+        '<td>' + fmt(w * h * q) + ' Wh</td>' +
+        '</tr>';
+    }).join('');
+    html += '<table class="report-table">' +
+      '<thead><tr><th>Device</th><th>Qty</th><th>Watts</th><th>Hours</th><th>Wh</th></tr></thead>' +
+      '<tbody>' + deviceRowsHTML +
+      '<tr class="report-table__total"><td>Total</td><td></td><td>' + fmt(dailyTotals.totalWatts) + ' W</td><td></td><td>' + fmt(dailyTotals.totalWh) + ' Wh</td></tr>' +
+      '</tbody></table>';
+    html += '<p class="print-report__note">Derate factors — solar: ×' + fmt(solarFactor) + ', AC: ×' + fmt(acFactor) + '. Runtime uses a 0.85 inverter efficiency factor.</p>';
+
+    html += '<h2 class="print-report__h2">Power Stations Summary</h2>';
+    stations.forEach(function (s) { html += reportStationHTML(s); });
+
+    printReport.innerHTML = html;
+  }
+
+  function reportStationHTML(s) {
+    var r = s.calcs.runtime;
+    var over = r.done && r.loadWatts > s.continuousOutputW;
+    return '<div class="report-station">' +
+      '<h3>' + esc(s.name) + (s.brand ? ' <span>· ' + esc(s.brand) + '</span>' : '') + '</h3>' +
+      '<table class="report-table">' +
+      '<thead><tr><th>Capacity</th><th>Continuous Output</th><th>AC Input</th><th>Solar Input</th><th>Price</th></tr></thead>' +
+      '<tbody><tr>' +
+      '<td>' + fmt(s.capacityWh) + ' Wh</td>' +
+      '<td>' + fmt(s.continuousOutputW) + ' W</td>' +
+      '<td>' + fmt(s.acChargeW) + ' W</td>' +
+      '<td>' + fmt(s.solarChargeW) + ' W</td>' +
+      '<td>' + priceLabel(s.price) + '</td>' +
+      '</tr></tbody></table>' +
+      '<table class="report-table">' +
+      '<thead><tr><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th></tr></thead>' +
+      '<tbody><tr>' +
+      '<td>' + (r.done ? fmt(r.hours) + ' h' : '—') + '</td>' +
+      '<td>' + (s.calcs.solar.done ? fmt(s.calcs.solar.hours) + ' h' : '—') + '</td>' +
+      '<td>' + (s.calcs.ac.done ? fmt(s.calcs.ac.hours) + ' h' : '—') + '</td>' +
+      '</tr></tbody></table>' +
+      (r.done ? '<p class="report-station__status' + (over ? ' report-station__status--warn' : '') + '">' +
+        (over ? 'Load exceeds continuous output (' + fmt(s.continuousOutputW) + ' W)' : 'Within continuous output (' + fmt(s.continuousOutputW) + ' W) at ' + fmt(r.loadWatts) + ' W load') +
+        '</p>' : '') +
       '</div>';
   }
 
@@ -439,8 +602,9 @@
     deviceRows.innerHTML = devices.map(function (d, i) {
       return '<tr data-device="' + i + '">' +
         '<td><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Laptop" autocomplete="off"></td>' +
-        '<td><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="any" placeholder="100" inputmode="decimal"></td>' +
-        '<td><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="any" placeholder="5" inputmode="decimal"></td>' +
+        '<td class="device-table__qty"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' + (isInvalidNumber('watts', d.watts) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' + (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + '></td>' +
         '<td data-wh>—</td>' +
         '<td><button type="button" class="device-remove" data-remove="' + i + '" aria-label="Remove device">' + iconTrash() + '</button></td>' +
         '</tr>';
@@ -452,9 +616,9 @@
       var idx = Number(row.dataset.device);
       var d = devices[idx];
       if (!d) return;
-      var w = parseFloat(d.watts);
-      var h = parseFloat(d.hours);
-      var wh = isFinite(w) && isFinite(h) && w > 0 && h > 0 ? w * h : 0;
+      var w = parseNum(d.watts);
+      var h = parseNum(d.hours);
+      var wh = isFinite(w) && isFinite(h) && w > 0 && h > 0 ? w * h * deviceQty(d) : 0;
       row.querySelector('[data-wh]').textContent = wh > 0 ? fmt(wh) : '—';
     });
     dailyWattsEl.textContent = fmt(dailyTotals.totalWatts) + ' W';
@@ -462,20 +626,23 @@
   }
 
   function setSharedInputs() {
+    currencyInput.value = currency;
     solarFactorInput.value = num(solarFactor);
     acFactorInput.value = num(acFactor);
+    priceLabelEl.textContent = 'Price (' + currencySymbol() + ')';
   }
 
   /* ---------- Events ---------- */
 
   function bindGlobalEvents() {
-    emptyAddBtn.addEventListener('click', function () {
-      document.getElementById('station-name').focus();
-      document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+    openModalBtn.addEventListener('click', openStationModal);
+    emptyAddBtn.addEventListener('click', openStationModal);
+    cancelModalBtn.addEventListener('click', function () {
+      closeStationModal(true);
     });
 
     addDeviceBtn.addEventListener('click', function () {
-      devices.push({ name: '', watts: '', hours: '' });
+      devices.push(blankDevice());
       recomputeAll();
       renderDeviceRows();
       updateDeviceUI();
@@ -492,6 +659,9 @@
       var field = e.target.dataset.field;
       if (!field || !devices[idx]) return;
       devices[idx][field] = e.target.value;
+      if (field !== 'name' && e.target.classList) {
+        e.target.classList.toggle('is-invalid', isInvalidNumber(field, e.target.value));
+      }
       recomputeAll();
       updateDeviceUI();
       save();
@@ -503,7 +673,7 @@
       if (!btn) return;
       var idx = Number(btn.dataset.remove);
       devices.splice(idx, 1);
-      if (devices.length === 0) devices.push({ name: '', watts: '', hours: '' });
+      if (devices.length === 0) devices.push(blankDevice());
       recomputeAll();
       renderDeviceRows();
       updateDeviceUI();
@@ -511,21 +681,28 @@
       render();
     });
 
-    solarFactorInput.addEventListener('input', function () {
-      var v = parseFloat(solarFactorInput.value);
-      if (isFinite(v) && v > 0) solarFactor = v;
-      recomputeAll();
+    currencyInput.addEventListener('change', function () {
+      if (CURRENCY_SYMBOLS[currencyInput.value]) currency = currencyInput.value;
+      setSharedInputs();
       save();
       render();
     });
 
-    acFactorInput.addEventListener('input', function () {
-      var v = parseFloat(acFactorInput.value);
-      if (isFinite(v) && v > 0) acFactor = v;
-      recomputeAll();
-      save();
-      render();
+    bindFactorInput(solarFactorInput, function (v) { solarFactor = v; });
+    bindFactorInput(acFactorInput, function (v) { acFactor = v; });
+
+    function closeGuideline() {
+      guidelineModal.hidden = true;
+      document.body.classList.remove('is-modal-open');
+    }
+
+    openGuidelineBtn.addEventListener('click', function () {
+      guidelineModal.hidden = false;
+      document.body.classList.add('is-modal-open');
     });
+
+    guidelineMask.addEventListener('click', closeGuideline);
+    guidelineCloseBtn.addEventListener('click', closeGuideline);
 
     generateCompareBtn.addEventListener('click', function () {
       if (stations.length === 0) {
@@ -544,15 +721,16 @@
     });
 
     clearAllBtn.addEventListener('click', function () {
-      if (stations.length === 0 && devices.length === 1 && !devices[0].name && !devices[0].watts && !devices[0].hours) {
+      if (stations.length === 0 && devices.length === 1 && !devices[0].name && !devices[0].watts && !devices[0].hours && !devices[0].qty) {
         showToast('Nothing to clear');
         return;
       }
       if (window.confirm('Clear all power stations, devices, and calculations?')) {
         stations = [];
-        devices = [{ name: '', watts: '', hours: '' }];
+        devices = [blankDevice()];
         solarFactor = 1.2;
         acFactor = 1.1;
+        currency = 'Tk';
         activeStationId = null;
         recomputeAll();
         renderDeviceRows();
@@ -569,12 +747,12 @@
 
       var name = (nameInput.value || '').trim();
       var brand = (brandInput.value || '').trim();
-      var capacityWh = parseFloat(capacityInput.value);
-      var continuousOutputW = parseFloat(outputInput.value);
-      var acChargeW = parseFloat(acChargeInput.value);
-      var solarChargeW = parseFloat(solarChargeInput.value);
+      var capacityWh = parseNum(capacityInput.value);
+      var continuousOutputW = parseNum(outputInput.value);
+      var acChargeW = parseNum(acChargeInput.value);
+      var solarChargeW = parseNum(solarChargeInput.value);
       var priceRaw = (priceInput.value || '').trim();
-      var price = priceRaw === '' ? null : parseFloat(priceRaw);
+      var price = priceRaw === '' ? null : parseNum(priceRaw);
 
       var valid = true;
       valid = validate(nameInput, !!name, 'Name is required') && valid;
@@ -600,10 +778,26 @@
       activeStationId = station.id;
       recomputeAll();
       save();
-      addForm.reset();
-      clearAddErrors();
+      closeStationModal(true);
       render();
       showToast('Power station added');
+    });
+  }
+
+  function bindFactorInput(input, setter) {
+    input.addEventListener('input', function () {
+      var raw = (input.value || '').trim();
+      var v = parseNum(raw);
+      var ok = isFinite(v) && v > 0;
+      if (raw !== '' && !ok) {
+        setFieldError(input, 'Enter a decimal number greater than 0');
+      } else {
+        setFieldError(input, '');
+        if (ok) setter(v);
+      }
+      recomputeAll();
+      save();
+      render();
     });
   }
 

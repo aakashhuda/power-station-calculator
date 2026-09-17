@@ -19,3 +19,10 @@
 - Uses domain-accurate terminology in UI labels (e.g., power-station wall charging is "AC input", not "DC input"). Confidence: 0.6
 - Prefers visual redesigns to leave functionality untouched — markup classes and styles change, but element IDs and JS behavior stay stable. Confidence: 0.75
 - Grants latitude to go beyond the literal request for visual quality ("make it more beautiful and lively"); welcomes expressive styling, motion, and micro-interactions. Confidence: 0.65
+- Maintains a `context/` directory of project docs (overview, git conventions, AI interaction rules, domain formulas) and expects the assistant to read that context to learn the project before making changes. Confidence: 0.7
+- Keeps requirement/prompt documents under `context/docs/prompts/` and asks the assistant to implement them as a full batch, referencing them with @-file mentions rather than restating the items. Confidence: 0.65
+- Expects the documented project workflow to be followed on new work: create a feature branch and record scope plus "done when" criteria in `context/current-feature.md` before implementing. Confidence: 0.6
+- Prohibits installing external packages or CLI tools (even globally, e.g. browser-automation helpers); expects verification via simple testing approaches that stay inside the project and use only what is already available locally, and the task to continue without installs. Confidence: 0.9
+- Wants verification kept basic after implementation (e.g. a syntax check plus a simple in-project DOM/logic smoke test) rather than elaborate, browser-driven, or framework-based testing. Confidence: 0.7
+- For follow-up improvement batches that refine just-completed work, stay on the existing feature branch — do not create a new branch per iteration. Confidence: 0.7
+- When a session is interrupted mid-task (e.g., running out of credits), expects the assistant to resume exactly where it left off — continuing the existing todo list and partially-applied edits — without restarting, re-planning, or re-asking for requirements. Confidence: 0.6

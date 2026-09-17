@@ -20,13 +20,17 @@
         <span class="brand__name">PowerStationCalc</span>
       </a>
       <div class="nav__actions">
+        <button type="button" class="btn btn--ghost btn--sm" id="open-guideline">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+          Guideline
+        </button>
         <button type="button" class="btn btn--primary btn--sm" id="generate-compare">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
-          Generate comparison
+          Generate Comparison
         </button>
         <button type="button" class="btn btn--ghost btn--sm" id="clear-all">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
-          Clear all
+          Clear All
         </button>
       </div>
     </div>
@@ -37,22 +41,23 @@
       <div class="container">
         <div class="section-head">
           <span class="eyebrow">Workbench</span>
-          <h1>Power station <span class="grad">calculator</span></h1>
+          <h1>Power Station <span class="grad">Calculator</span></h1>
           <p class="lede">Enter shared devices, then add power stations with their charging inputs to see runtime and recharge times update automatically.</p>
         </div>
 
-        <div class="grid-2">
+        <div class="card-stack">
           <section class="card card--devices" aria-label="Daily energy consumption">
             <div class="card__head">
-              <h2>Daily energy consumption</h2>
+              <h2>Daily Energy Consumption</h2>
               <p>Devices are shared across every power station.</p>
             </div>
-            <div class="formula">Device watts × hours used = watt-hours (Wh)</div>
+            <div class="formula">Device watts × quantity × hours used = watt-hours (Wh)</div>
             <div class="table-wrap">
               <table class="device-table">
                 <thead>
                   <tr>
                     <th>Device</th>
+                    <th>Qty</th>
                     <th>Watts (W)</th>
                     <th>Hours (h)</th>
                     <th>Wh</th>
@@ -63,98 +68,73 @@
               </table>
             </div>
             <div class="device-total">
-              <span>Total load: <strong id="daily-watts">0 W</strong></span>
-              <span>Total energy: <strong id="daily-wh">0 Wh</strong></span>
-            </div>
-            <div class="card__actions">
               <button type="button" class="btn btn--ghost btn--sm" id="add-device">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
-                Add device
+                Add Device
               </button>
+              <span class="device-total__figures">
+                <span>Total Load: <strong id="daily-watts">0 W</strong></span>
+                <span>Total Energy: <strong id="daily-wh">0 Wh</strong></span>
+              </span>
             </div>
           </section>
 
-          <section class="card card--factors" aria-label="Efficiency factors">
+          <section class="card card--factors" aria-label="Shared settings">
             <div class="card__head">
-              <h2>Efficiency factors</h2>
-              <p>Shared derate assumptions used across every station.</p>
+              <h2>Shared Settings</h2>
+              <p>Currency and derate assumptions used across every station.</p>
             </div>
             <div class="field">
-              <label for="solar-factor">Solar derate factor</label>
+              <label for="currency">Currency</label>
+              <select id="currency">
+                <option value="Tk" selected>Tk (৳)</option>
+                <option value="USD">USD ($)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
+              <div class="field__hint">Used for power station prices.</div>
+            </div>
+            <div class="field">
+              <label for="solar-factor">Solar Derate Factor</label>
               <input id="solar-factor" type="number" min="0" step="0.01" placeholder="1.2" inputmode="decimal" />
               <div class="field__hint">Typical range 1.15–1.25.</div>
             </div>
             <div class="field">
-              <label for="ac-factor">AC derate factor</label>
+              <label for="ac-factor">AC Derate Factor</label>
               <input id="ac-factor" type="number" min="0" step="0.01" placeholder="1.1" inputmode="decimal" />
               <div class="field__hint">Charging losses; ~1.1 is typical.</div>
             </div>
           </section>
         </div>
 
-        <div class="station-layout">
-          <aside class="card card--add" aria-label="Add power station">
-            <div class="card__head">
-              <h2>Add power station</h2>
-              <p>Enter the specs from the manufacturer sheet.</p>
-            </div>
-            <form id="add-station-form" novalidate>
-              <div class="field">
-                <label for="station-name">Name</label>
-                <input id="station-name" name="name" type="text" placeholder="EcoFlow DELTA 2" autocomplete="off" required />
-              </div>
-              <div class="field">
-                <label for="station-brand">Brand</label>
-                <input id="station-brand" name="brand" type="text" placeholder="EcoFlow" autocomplete="off" />
-              </div>
-              <div class="field">
-                <label for="station-capacity">Battery capacity (Wh)</label>
-                <input id="station-capacity" name="capacityWh" type="number" min="1" step="any" placeholder="1024" inputmode="decimal" required />
-              </div>
-              <div class="field">
-                <label for="station-output">Continuous AC output (W)</label>
-                <input id="station-output" name="continuousOutputW" type="number" min="1" step="any" placeholder="1800" inputmode="decimal" required />
-              </div>
-              <div class="field">
-                <label for="station-accharge">AC input (W)</label>
-                <input id="station-accharge" name="acChargeW" type="number" min="1" step="any" placeholder="1200" inputmode="decimal" required />
-              </div>
-              <div class="field">
-                <label for="station-solarcharge">Solar input (W)</label>
-                <input id="station-solarcharge" name="solarChargeW" type="number" min="1" step="any" placeholder="400" inputmode="decimal" required />
-              </div>
-              <div class="field">
-                <label for="station-price">Price ($)</label>
-                <input id="station-price" name="price" type="number" min="0" step="any" placeholder="999" inputmode="decimal" />
-              </div>
-              <button type="submit" class="btn btn--primary btn--block">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
-                Add station
-              </button>
-            </form>
-          </aside>
+        <section class="stations" aria-label="Power stations">
+          <div class="stations__bar">
+            <div id="station-tabs" class="tabs" role="tablist" aria-label="Power stations"></div>
+            <button type="button" class="tab tab--add" id="open-station-modal">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              Add Power Station
+            </button>
+          </div>
 
-          <section class="stations" aria-label="Power stations">
-            <div id="empty-state" class="empty-state" hidden>
-              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="7" width="18" height="12" rx="2"></rect>
-                <path d="M7 11h6M7 15h4M21 10.5h1.5M21 13.5h1.5"></path>
-              </svg>
-              <p>No power stations yet.</p>
-              <button type="button" class="btn btn--ghost" id="empty-add-btn">Add your first station</button>
-            </div>
+          <div id="empty-state" class="empty-state" hidden>
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="7" width="18" height="12" rx="2"></rect>
+              <path d="M7 11h6M7 15h4M21 10.5h1.5M21 13.5h1.5"></path>
+            </svg>
+            <p>No power stations yet.</p>
+            <button type="button" class="btn btn--ghost" id="empty-add-btn">Add Your First Station</button>
+          </div>
 
-            <div id="stations-area" hidden>
-              <div id="station-tabs" class="tabs" role="tablist" aria-label="Power stations"></div>
-              <div id="station-content"></div>
-            </div>
-          </section>
-        </div>
+          <div id="stations-area" hidden>
+            <div id="station-content"></div>
+          </div>
+        </section>
       </div>
     </section>
 
     <section class="section section--compare" id="compare">
       <div class="container">
+        <div id="print-report" class="print-report"></div>
         <div class="section-head">
           <span class="eyebrow">Output</span>
           <h2>Comparison</h2>
@@ -170,6 +150,84 @@
       <p>PowerStationCalc — load, runtime, and recharge estimates for informed buying decisions.</p>
     </div>
   </footer>
+
+  <div class="modal" id="station-modal" hidden>
+    <div class="modal__mask"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="station-modal-title">
+      <div class="modal__head">
+        <h2 id="station-modal-title">Add Power Station</h2>
+        <p>Enter the specs from the manufacturer sheet.</p>
+      </div>
+      <form id="add-station-form" novalidate>
+        <div class="field">
+          <label for="station-name">Name <span class="req">*</span></label>
+          <input id="station-name" name="name" type="text" placeholder="EcoFlow DELTA 2" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label for="station-brand">Brand</label>
+          <input id="station-brand" name="brand" type="text" placeholder="EcoFlow" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="station-capacity">Battery Capacity (Wh) <span class="req">*</span></label>
+          <input id="station-capacity" name="capacityWh" type="number" min="1" step="0.5" placeholder="1024" inputmode="decimal" required />
+        </div>
+        <div class="field">
+          <label for="station-output">Continuous AC Output (W) <span class="req">*</span></label>
+          <input id="station-output" name="continuousOutputW" type="number" min="1" step="0.5" placeholder="1800" inputmode="decimal" required />
+        </div>
+        <div class="field">
+          <label for="station-accharge">AC Input (W) <span class="req">*</span></label>
+          <input id="station-accharge" name="acChargeW" type="number" min="1" step="0.5" placeholder="1200" inputmode="decimal" required />
+        </div>
+        <div class="field">
+          <label for="station-solarcharge">Solar Input (W) <span class="req">*</span></label>
+          <input id="station-solarcharge" name="solarChargeW" type="number" min="1" step="0.5" placeholder="400" inputmode="decimal" required />
+        </div>
+        <div class="field">
+          <label for="station-price" id="station-price-label">Price (৳)</label>
+          <input id="station-price" name="price" type="number" min="0" step="0.5" placeholder="999" inputmode="decimal" />
+        </div>
+      </form>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" id="station-modal-cancel">Cancel</button>
+        <button type="submit" form="add-station-form" class="btn btn--primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Add Station
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal modal--guideline" id="guideline-modal" hidden>
+    <div class="modal__mask"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="guideline-title">
+      <button type="button" class="modal__close" id="guideline-close" aria-label="Close Guideline">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+      </button>
+      <div class="modal__head">
+        <h2 id="guideline-title">Guideline</h2>
+        <p>How to use PowerStationCalc and how the numbers are calculated.</p>
+      </div>
+      <div class="guideline">
+        <h3>1. Enter Your Daily Energy Consumption</h3>
+        <p>List every device you plan to run with its quantity, watts, and hours used per day. These devices are shared across every power station, and the totals drive all runtime estimates.</p>
+        <div class="formula">Device Wh = Watts × Qty × Hours &nbsp;·&nbsp; Total Load (W) = sum of Watts × Qty</div>
+        <h3>2. Check the Shared Settings</h3>
+        <p>Pick the currency used for station prices, and adjust the derate factors if you want more optimistic or conservative recharge estimates. Typical values: solar 1.15–1.25, AC ~1.1.</p>
+        <h3>3. Add Power Stations</h3>
+        <p>Click “+ Add Power Station” beside the station tabs and enter the specs from the manufacturer sheet: battery capacity, continuous AC output, AC input, solar input, and price. Required fields are marked with an asterisk (*). The station is added when you press “Add Station”; “Cancel” closes the form and clears it.</p>
+        <h3>4. Read the Results</h3>
+        <p>Each station tab shows its specs and three results that update automatically as you type:</p>
+        <div class="formula">Runtime (h) ≈ (Capacity Wh × 0.85) ÷ Total Load W</div>
+        <div class="formula">Solar Recharge (h) ≈ (Capacity Wh ÷ Solar Input W) × Solar Derate Factor</div>
+        <div class="formula">AC Recharge (h) ≈ (Capacity Wh ÷ AC Input W) × AC Derate Factor</div>
+        <p>0.85 is the inverter efficiency factor for AC output; DC loads may run longer. The derate factors cover real-world losses such as sun angle, panel temperature, and charging losses. A warning is shown if your total load exceeds a station's continuous AC output.</p>
+        <h3>5. Compare and Download the PDF</h3>
+        <p>Once every station's inputs are complete, “Generate Comparison” builds a side-by-side table. The longest runtime and the shortest solar and AC recharge times are highlighted with a green Best badge. “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your daily consumption, each station's summary, and the comparison table.</p>
+        <p class="guideline__note">Your data is saved in this browser's local storage and restored when you return. “Clear All” in the navbar resets everything.</p>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
