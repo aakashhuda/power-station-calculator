@@ -70,3 +70,41 @@ Implemented on the same branch:
    (nth-child ≥ 6) are center-aligned, headers and cells.
 
 Verified with `node --check` and the extended DOM smoke test (55/55 passing).
+
+## Follow-up — Improvements 4 (mobile layout fixes, inline request)
+
+Source: inline request. Branch: `ui/redesign` (unchanged, as requested).
+Scope: mobile-only layout issues, plus one change applied at every width.
+
+1. **Horizontal overflow fixed** — the Daily Energy Consumption and Shared
+   Settings cards were 396px wide on a 390px screen (27px of page overflow).
+   Root cause: `.card-stack` used `grid-template-columns: 1fr`, so each grid
+   item's automatic minimum size equalled the device table's min-content width
+   and the column could not shrink. Fixed with `minmax(0, 1fr)` (and the same
+   for the mobile `.results-grid`). Both cards now sit inside the gutter.
+2. **Navbar action buttons** — `Generate Comparison` → `Comparison` and
+   `Clear All` → `Clear` below 640px (long labels kept on wider screens via
+   `.btn__label--long` / `--short`). Buttons use `flex: 1 1 0` and their icons
+   are hidden on mobile, so all three are exactly equal width (111px each at
+   390px) with no text truncation.
+3. **Daily consumption form** — below 640px the 6-column table becomes one card
+   per device: device name full width with the delete button pinned top-right,
+   then a 2×2 grid of Qty / Watts / Hours / Energy. Every field carries a
+   visible label from `data-label` (`::before`), and inputs are 127px wide
+   instead of 26–45px.
+4. **Comparison mobile layout** — below 768px the table becomes one card per
+   station (name as the card heading, then label/value rows). No horizontal
+   scrolling anywhere; "Best" badges are preserved.
+5. **Daily Need moved out of the table** — the column is gone at every width;
+   it is stated once above the table as `.compare-daily`
+   ("Daily Energy Need — shared by every station · 2480 Wh per day · 360 W
+   total load") on screen and in the PDF. This also fixes the PDF clipping:
+   the comparison table was 745px wide inside a 672px A4 content area (73px
+   cut off); it is now 626px and fits.
+6. Mobile-layout rules are inside `@media screen and (...)`, so the print
+   report always keeps real tables. `node --check` passes.
+
+Verified against a headless-Chromium run (Node built-ins only — no packages
+installed): 42/42 layout + behaviour checks and 16/16 edge-case checks
+(320/360/390/480/640px, desktop, print emulation at A4 content width, fresh
+and legacy localStorage, locked comparison state, station modal).

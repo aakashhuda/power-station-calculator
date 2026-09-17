@@ -26,11 +26,13 @@
         </button>
         <button type="button" class="btn btn--primary btn--sm" id="generate-compare">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
-          Generate Comparison
+          <span class="btn__label btn__label--long">Generate Comparison</span>
+          <span class="btn__label btn__label--short">Comparison</span>
         </button>
         <button type="button" class="btn btn--ghost btn--sm" id="clear-all">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
-          Clear All
+          <span class="btn__label btn__label--long">Clear All</span>
+          <span class="btn__label btn__label--short">Clear</span>
         </button>
       </div>
     </div>
@@ -40,7 +42,6 @@
     <section class="section" id="calculator">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">Workbench</span>
           <h1>Power Station <span class="grad">Calculator</span></h1>
           <p class="lede">Enter shared devices, then add power stations with their charging inputs to see runtime and recharge times update automatically.</p>
         </div>
@@ -223,7 +224,7 @@
         <div class="formula">AC Recharge (h) ≈ (Capacity Wh ÷ AC Input W) × AC Derate Factor</div>
         <p>0.85 is the inverter efficiency factor for AC output; DC loads may run longer. The derate factors cover real-world losses such as sun angle, panel temperature, and charging losses. A warning is shown if your total load exceeds a station's continuous AC output.</p>
         <h3>5. Compare and Download the PDF</h3>
-        <p>Once every station's inputs are complete, “Generate Comparison” builds a side-by-side table. The longest runtime and the shortest solar and AC recharge times are highlighted with a green Best badge. “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your daily consumption, each station's summary, and the comparison table.</p>
+        <p>Once every station's inputs are complete, “Generate Comparison” builds a side-by-side table — your daily energy need is stated once above it, since it is the same for every station. The longest runtime and the shortest solar and AC recharge times are highlighted with a green Best badge. “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your daily consumption, each station's summary, and the comparison table.</p>
         <p class="guideline__note">Your data is saved in this browser's local storage and restored when you return. “Clear All” in the navbar resets everything.</p>
       </div>
     </div>

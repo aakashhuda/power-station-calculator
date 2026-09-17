@@ -472,10 +472,22 @@
     return best;
   }
 
-  function bestCell(value, unit, isBest) {
+  function bestCell(value, unit, isBest, label) {
     return isBest
-      ? '<td class="is-best"><span class="best-badge" title="Best">' + value + ' ' + unit + '</span></td>'
-      : '<td>' + value + ' ' + unit + '</td>';
+      ? '<td class="is-best" data-label="' + label + '"><span class="best-badge" title="Best">' + value + ' ' + unit + '</span></td>'
+      : '<td data-label="' + label + '">' + value + ' ' + unit + '</td>';
+  }
+
+  // Daily need is identical for every station, so it sits above the table
+  // instead of repeating as a column.
+  function dailyNeedHTML() {
+    return '<div class="compare-daily">' +
+      '<span class="compare-daily__label">Daily Energy Need — shared by every station</span>' +
+      '<span class="compare-daily__values">' +
+      '<span><strong>' + fmt(dailyTotals.totalWh) + ' Wh</strong> per day</span>' +
+      '<span><strong>' + fmt(dailyTotals.totalWatts) + ' W</strong> total load</span>' +
+      '</span>' +
+      '</div>';
   }
 
   function renderComparison() {
@@ -503,21 +515,20 @@
 
   function comparisonTableHTML() {
     var head = '<thead><tr>' +
-      '<th>Power Station</th><th>Brand</th><th>Price</th><th>Capacity</th><th>Daily Need</th><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th>' +
+      '<th>Power Station</th><th>Brand</th><th>Price</th><th>Capacity</th><th>Runtime</th><th>Solar Recharge</th><th>AC Recharge</th>' +
       '</tr></thead>';
 
     var best = bestValues();
 
     var rows = stations.map(function (s) {
       return '<tr>' +
-        '<td>' + esc(s.name) + '</td>' +
-        '<td>' + esc(s.brand || '—') + '</td>' +
-        '<td>' + priceLabel(s.price) + '</td>' +
-        '<td>' + fmt(s.capacityWh) + ' Wh</td>' +
-        '<td>' + fmt(dailyTotals.totalWh) + ' Wh</td>' +
-        bestCell(fmt(s.calcs.runtime.hours), 'h', s.calcs.runtime.hours === best.runtime) +
-        bestCell(fmt(s.calcs.solar.hours), 'h', s.calcs.solar.hours === best.solar) +
-        bestCell(fmt(s.calcs.ac.hours), 'h', s.calcs.ac.hours === best.ac) +
+        '<td data-label="Power Station">' + esc(s.name) + '</td>' +
+        '<td data-label="Brand">' + esc(s.brand || '—') + '</td>' +
+        '<td data-label="Price">' + priceLabel(s.price) + '</td>' +
+        '<td data-label="Capacity">' + fmt(s.capacityWh) + ' Wh</td>' +
+        bestCell(fmt(s.calcs.runtime.hours), 'h', s.calcs.runtime.hours === best.runtime, 'Runtime') +
+        bestCell(fmt(s.calcs.solar.hours), 'h', s.calcs.solar.hours === best.solar, 'Solar Recharge') +
+        bestCell(fmt(s.calcs.ac.hours), 'h', s.calcs.ac.hours === best.ac, 'AC Recharge') +
         '</tr>';
     }).join('');
 
@@ -526,6 +537,7 @@
       '<div><h3>Comparison Table</h3><p class="compare-note">Longest runtime and shortest recharge times are marked "Best". Choose "Save as PDF" in the print dialog to download.</p></div>' +
       '<button type="button" class="btn btn--primary" id="download-pdf">Download PDF</button>' +
       '</div>' +
+      dailyNeedHTML() +
       '<div class="compare-table-wrap"><table class="compare-table">' + head + '<tbody>' + rows + '</tbody></table></div>' +
       '</div>';
   }
@@ -601,12 +613,12 @@
   function renderDeviceRows() {
     deviceRows.innerHTML = devices.map(function (d, i) {
       return '<tr data-device="' + i + '">' +
-        '<td><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Laptop" autocomplete="off"></td>' +
-        '<td class="device-table__qty"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
-        '<td><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' + (isInvalidNumber('watts', d.watts) ? ' class="is-invalid"' : '') + '></td>' +
-        '<td><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' + (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + '></td>' +
-        '<td data-wh>—</td>' +
-        '<td><button type="button" class="device-remove" data-remove="' + i + '" aria-label="Remove device">' + iconTrash() + '</button></td>' +
+        '<td class="device-cell device-cell--name"><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Laptop" autocomplete="off"></td>' +
+        '<td class="device-cell device-table__qty" data-label="Qty"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td class="device-cell" data-label="Watts (W)"><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' + (isInvalidNumber('watts', d.watts) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td class="device-cell" data-label="Hours (h)"><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' + (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td class="device-cell" data-label="Energy (Wh)" data-wh>—</td>' +
+        '<td class="device-cell device-cell--remove"><button type="button" class="device-remove" data-remove="' + i + '" aria-label="Remove device">' + iconTrash() + '</button></td>' +
         '</tr>';
     }).join('');
   }

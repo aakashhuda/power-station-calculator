@@ -183,6 +183,11 @@ img {
   width: 100%;
 }
 
+/* Short mobile label variant; the long label is the default. */
+.btn__label--short {
+  display: none;
+}
+
 .btn--sm {
   padding: 8px 16px;
   font-size: 13px;
@@ -274,7 +279,9 @@ img {
 
 .card-stack {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr) — a bare 1fr keeps the items' automatic minimum size
+     (the device table's min-content width), which overflows narrow screens. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gap);
   margin-bottom: var(--gap);
 }
@@ -820,6 +827,42 @@ img {
   color: var(--smoke);
 }
 
+/* Daily need is the same for every station, so it is stated once above the table. */
+.compare-daily {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--mist);
+  border: 1px solid var(--ash);
+  border-radius: var(--r-input);
+}
+
+.compare-daily__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+.compare-daily__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  font-size: 14px;
+  color: var(--smoke);
+}
+
+.compare-daily__values strong {
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
 .compare-locked {
   padding: 40px 24px;
   font-size: 15px;
@@ -874,8 +917,8 @@ img {
   text-align: left;
 }
 
-.compare-table th:nth-child(n + 6),
-.compare-table td:nth-child(n + 6) {
+.compare-table th:nth-child(n + 5),
+.compare-table td:nth-child(n + 5) {
   text-align: center;
 }
 
@@ -1125,7 +1168,7 @@ body.is-modal-open {
   }
 
   .results-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1141,10 +1184,208 @@ body.is-modal-open {
 
   .nav__actions {
     width: 100%;
+    gap: 8px;
   }
 
+  /* Equal-width action buttons: shorter labels plus a zero flex basis so the
+     three buttons always split the row evenly. Icons are dropped here so the
+     longer labels ("Comparison") still fit without truncating. */
   .nav__actions .btn {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .nav__actions .btn svg {
+    display: none;
+  }
+
+  .nav__actions .btn__label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .btn__label--long {
+    display: none;
+  }
+
+  .btn__label--short {
+    display: inline;
+  }
+}
+
+/* ---------- Mobile layouts (screen only — print keeps the real tables) ---------- */
+
+/* Comparison table becomes one card per station, so nothing needs side scrolling. */
+@media screen and (max-width: 768px) {
+  .compare-card {
+    padding: 16px;
+  }
+
+  .compare-table-wrap {
+    overflow: visible;
+  }
+
+  .compare-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .compare-table thead {
+    display: none;
+  }
+
+  .compare-table tbody {
+    display: block;
+  }
+
+  .compare-table tbody tr {
+    display: block;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--paper);
+    border: 1px solid var(--fog);
+    border-radius: var(--r-input);
+  }
+
+  .compare-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .compare-table tbody tr:nth-child(even) td,
+  .compare-table tbody tr:hover td {
+    background: transparent;
+  }
+
+  .compare-table td,
+  .compare-table td:nth-child(n + 5) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    text-align: right;
+    white-space: normal;
+    border-bottom: 1px solid var(--ash);
+  }
+
+  .compare-table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--smoke);
+  }
+
+  /* Station name heads the card. */
+  .compare-table td:first-child {
+    display: block;
+    padding: 0 0 12px;
+    font-size: 17px;
+    letter-spacing: -0.2px;
+    text-align: left;
+    border-bottom: 1px solid var(--fog);
+  }
+
+  .compare-table td:first-child::before {
+    display: none;
+  }
+
+  .compare-table td:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+/* Daily consumption becomes one card per device, so the inputs stay usable. */
+@media screen and (max-width: 640px) {
+  .table-wrap {
+    overflow: visible;
+    margin-bottom: 0;
+  }
+
+  .device-table,
+  .device-table tbody {
+    display: block;
+  }
+
+  .device-table thead {
+    display: none;
+  }
+
+  .device-table tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--paper);
+    border: 1px solid var(--fog);
+    border-radius: var(--r-input);
+  }
+
+  .device-table td,
+  .device-table td:last-child {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+    text-align: left;
+  }
+
+  .device-table tbody tr:hover td {
+    background: transparent;
+  }
+
+  .device-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--smoke);
+  }
+
+  /* Specificity of `.device-table td` above is higher, so match it. */
+  .device-table td.device-cell--name {
+    grid-column: 1 / -1;
+    padding-right: 44px;
+  }
+
+  .device-cell--name::before,
+  .device-cell--remove::before {
+    display: none;
+  }
+
+  .device-cell--remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .device-table input {
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+
+  .device-table__qty {
+    width: auto;
+  }
+
+  .device-table td[data-wh] {
+    padding: 10px 12px;
+    text-align: right;
+    background: var(--mist);
+    border-radius: var(--r-btn);
   }
 }
 
@@ -1295,6 +1536,15 @@ body.is-modal-open {
     border: none;
   }
 
+  /* Daily need stays above the table in the PDF too, in place of the old column. */
+  .compare-daily {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: #f3f3f5 !important;
+    border-color: #e1e2e5 !important;
+    break-inside: avoid;
+  }
+
   .compare-table {
     min-width: 0;
     font-size: 12px;
@@ -1305,6 +1555,7 @@ body.is-modal-open {
   }
 
   .compare-table thead th {
+    white-space: normal;
     background: #25272d !important;
     color: #ffffff !important;
   }
@@ -1315,7 +1566,7 @@ body.is-modal-open {
 
   .compare-table th,
   .compare-table td {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
 
   .best-badge {
