@@ -13,7 +13,7 @@
       "Specifications are normalized from the specifications displayed on the Star Tech category/product listings available at collection time.",
       "A null value means the corresponding specification was not stated in the source listing reviewed."
     ],
-    "product_count": 38,
+    "product_count": 81,
     "brand_count": 7,
     "input_power_update": {
       "updated_date": "2026-09-18",
@@ -24,6 +24,198 @@
       "matched_products": 38,
       "products_without_verified_solar_wattage": [],
       "method": "Maximum charging/input power normalized to watts. Where the source supplied voltage/current together with an explicit maximum wattage, that published wattage was used. No unsupported wattage was fabricated."
+    },
+    "additional_product_research": {
+      "researched_date": "2026-09-18",
+      "scope": "Additional portable power station models found outside the original Star Tech category listings.",
+      "important_note": "This is a cross-source expansion, not a guarantee of every model ever sold globally. Accessories, expansion batteries, solar panels, and fixed home-storage systems were excluded.",
+      "new_products_added": 43,
+      "brands_with_additions": [
+        "Anker",
+        "Bluetti",
+        "EcoFlow",
+        "Marsriva",
+        "Oraimo"
+      ],
+      "brands_with_no_additional_verified_portable_models": [
+        "Hithium",
+        "EcoSONIC"
+      ],
+      "source_policy": "Manufacturer pages were preferred; non-StarTech retailer/catalog sources were used where manufacturer pages did not expose a suitable listing.",
+      "added_products": [
+        {
+          "brand": "Anker",
+          "model": "SOLIX C800"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX C800 Plus"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX F2000"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX F2600"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX F3000"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX F3800"
+        },
+        {
+          "brand": "Anker",
+          "model": "SOLIX S2000"
+        },
+        {
+          "brand": "Anker",
+          "model": "555 PowerHouse"
+        },
+        {
+          "brand": "Anker",
+          "model": "535 PowerHouse"
+        },
+        {
+          "brand": "Anker",
+          "model": "521 PowerHouse"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "RIVER 3 Max"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "DELTA 3 Plus"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "DELTA 3 (1500)"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "DELTA 3 Classic"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "DELTA 3 Max Plus"
+        },
+        {
+          "brand": "EcoFlow",
+          "model": "DELTA 3 Ultra Plus"
+        },
+        {
+          "brand": "Marsriva",
+          "model": "MP12"
+        },
+        {
+          "brand": "Oraimo",
+          "model": "PowerStation 600"
+        },
+        {
+          "brand": "Oraimo",
+          "model": "PowerStation 1000 (OPS-7101U)"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 10"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 30 V2"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 100 V2"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 200 V2"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 300"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 320"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Elite 400"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC2A"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC2P"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC50B"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC50P"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC60"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC60P"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC70"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC70P"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC180"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC180T"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC200L"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC200MAX"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC200PL"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC240"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "AC240P"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Apex 300"
+        },
+        {
+          "brand": "Bluetti",
+          "model": "Pioneer Na"
+        }
+      ]
     }
   },
   "brands": [
@@ -108,6 +300,256 @@
             "ports": null,
             "ac_input_w": 330,
             "solar_input_w": 100
+          }
+        },
+        {
+          "name": "Anker SOLIX C800 Portable Power Station",
+          "model": "SOLIX C800",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/C800-plus-c800-pps",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 768,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 750,
+            "solar_input_w": 300,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX C800 Plus Portable Power Station",
+          "model": "SOLIX C800 Plus",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://beta.ankersolix.com/products/c800-plus",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 768,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1100,
+            "solar_input_w": 300,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX F2000 Portable Power Station",
+          "model": "SOLIX F2000",
+          "price_bdt": null,
+          "availability": "Legacy/current regional",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/f2000",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2048,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1440,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX F2600 Portable Power Station",
+          "model": "SOLIX F2600",
+          "price_bdt": null,
+          "availability": "Legacy/current regional",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/f2600",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2560,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1440,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX F3000 Portable Power Station",
+          "model": "SOLIX F3000",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/f3000",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 3600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3072,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1800,
+            "solar_input_w": 2400,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX F3800 Portable Power Station",
+          "model": "SOLIX F3800",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/f3800",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 6000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3840,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1800,
+            "solar_input_w": 2400,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker SOLIX S2000 Portable Power Station",
+          "model": "SOLIX S2000",
+          "price_bdt": null,
+          "availability": "Announced/current",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/s2000",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2010,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1600,
+            "solar_input_w": 400,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker 555 PowerHouse Portable Power Station",
+          "model": "555 PowerHouse",
+          "price_bdt": null,
+          "availability": "Legacy/sold out",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/555",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 200,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker 535 PowerHouse Portable Power Station",
+          "model": "535 PowerHouse",
+          "price_bdt": null,
+          "availability": "Legacy/sold out",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/535",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 512,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 120,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Anker 521 PowerHouse Portable Power Station",
+          "model": "521 PowerHouse",
+          "price_bdt": null,
+          "availability": "Legacy",
+          "source": {
+            "primary_non_startech_url": "https://www.ankersolix.com/products/521",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 256,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
           }
         }
       ]
@@ -549,6 +991,156 @@
             "ac_input_w": 1800,
             "solar_input_w": 1000
           }
+        },
+        {
+          "name": "EcoFlow RIVER 3 Max Portable Power Station",
+          "model": "RIVER 3 Max",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://ecoflowindia.com/products/ecoflow-river-3-max-power-station-572wh",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 572,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 220,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "EcoFlow DELTA 3 Plus Portable Power Station",
+          "model": "DELTA 3 Plus",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://manuals.ecoflow.com/eu/product/delta-3-plus?lang=en_US3%2F51",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1500,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "EcoFlow DELTA 3 (1500) Portable Power Station",
+          "model": "DELTA 3 (1500)",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://ph.ecoflow.com/pages/help-me-choose",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1536,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1500,
+            "solar_input_w": 500,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "EcoFlow DELTA 3 Classic Portable Power Station",
+          "model": "DELTA 3 Classic",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.ecoflow.com/us/delta-3-classic-portable-power-station",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1400,
+            "solar_input_w": 500,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "EcoFlow DELTA 3 Max Plus Portable Power Station",
+          "model": "DELTA 3 Max Plus",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.ecoflow.com/us/delta-3-max-plus-portable-power-station",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 3000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2048,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 2300,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "EcoFlow DELTA 3 Ultra Plus Portable Power Station",
+          "model": "DELTA 3 Ultra Plus",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://us.ecoflow.com/collections/new-delta-3-series",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 3600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3072,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 2300,
+            "solar_input_w": 1600,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
         }
       ]
     },
@@ -642,6 +1234,31 @@
             "ports": null,
             "ac_input_w": 300,
             "solar_input_w": 200
+          }
+        },
+        {
+          "name": "Marsriva MP12 Portable Power Station",
+          "model": "MP12",
+          "price_bdt": null,
+          "availability": "Current manufacturer model; not in Star Tech list",
+          "source": {
+            "primary_non_startech_url": "https://www.marsriva.com/Products_details/239.html",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1254.4,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 900,
+            "solar_input_w": 150,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
           }
         }
       ]
@@ -783,6 +1400,56 @@
               "type_c": "1 x Type-C, 15W"
             }
           }
+        },
+        {
+          "name": "Oraimo PowerStation 600 Portable Power Station",
+          "model": "PowerStation 600",
+          "price_bdt": null,
+          "availability": "Current manufacturer model; not in Star Tech list",
+          "source": {
+            "primary_non_startech_url": "https://www.oraimo.com/en/collections/power",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": null,
+            "battery_capacity_wh": null,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 400,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Oraimo PowerStation 1000 (OPS-7101U) Portable Power Station",
+          "model": "PowerStation 1000 (OPS-7101U)",
+          "price_bdt": null,
+          "availability": "Current manufacturer model; not in Star Tech list",
+          "source": {
+            "primary_non_startech_url": "https://gh.oraimo.com/product/oraimo-powerstation-1000-1000w-portable-power-station-ops-7101u",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 896,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 230,
+            "solar_input_w": 440,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
         }
       ]
     },
@@ -878,6 +1545,606 @@
             "ports": null,
             "ac_input_w": 2300,
             "solar_input_w": 1000
+          }
+        },
+        {
+          "name": "Bluetti Elite 10 Portable Power Station",
+          "model": "Elite 10",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 128,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 30 V2 Portable Power Station",
+          "model": "Elite 30 V2",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 288,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 100 V2 Portable Power Station",
+          "model": "Elite 100 V2",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 200 V2 Portable Power Station",
+          "model": "Elite 200 V2",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.bluettipower.com/products/elite-200-v2-portable-power-station",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2073.6,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1800,
+            "solar_input_w": 1000,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 300 Portable Power Station",
+          "model": "Elite 300",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3014.4,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 320 Portable Power Station",
+          "model": "Elite 320",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3200,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Elite 400 Portable Power Station",
+          "model": "Elite 400",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3840,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC2A Portable Power Station",
+          "model": "AC2A",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": null,
+            "battery_capacity_wh": 204.8,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC2P Portable Power Station",
+          "model": "AC2P",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": null,
+            "battery_capacity_wh": 230.4,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC50B Portable Power Station",
+          "model": "AC50B",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 700,
+            "peak_output_w": null,
+            "battery_capacity_wh": 448,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 200,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC50P Portable Power Station",
+          "model": "AC50P",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 700,
+            "peak_output_w": null,
+            "battery_capacity_wh": 504,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC60 Portable Power Station",
+          "model": "AC60",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 403,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC60P Portable Power Station",
+          "model": "AC60P",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://shop.bluettipower.com/products/bluetti-ac60p-portable-power-station-600w-504wh",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": null,
+            "battery_capacity_wh": 504,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 600,
+            "solar_input_w": 200,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC70 Portable Power Station",
+          "model": "AC70",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 768,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": 500,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC70P Portable Power Station",
+          "model": "AC70P",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://www.bluettipower.com/products/bluetti-ac70p-portable-power-station-1000w-864wh",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 864,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 950,
+            "solar_input_w": 500,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC180 Portable Power Station",
+          "model": "AC180",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://www.bluettipower.com/products/ac180",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1152,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 1440,
+            "solar_input_w": 500,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC180T Portable Power Station",
+          "model": "AC180T",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1433,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC200L Portable Power Station",
+          "model": "AC200L",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2048,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": 2400,
+            "solar_input_w": 1200,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC200MAX Portable Power Station",
+          "model": "AC200MAX",
+          "price_bdt": null,
+          "availability": "Legacy/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2048,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC200PL Portable Power Station",
+          "model": "AC200PL",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2304,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC240 Portable Power Station",
+          "model": "AC240",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1536,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti AC240P Portable Power Station",
+          "model": "AC240P",
+          "price_bdt": null,
+          "availability": "Current/regional",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1843,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Apex 300 Portable Power Station",
+          "model": "Apex 300",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.com/collections/power-stations",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 3840,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2764.8,
+            "battery_chemistry": "LiFePO4",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
+          }
+        },
+        {
+          "name": "Bluetti Pioneer Na Portable Power Station",
+          "model": "Pioneer Na",
+          "price_bdt": null,
+          "availability": "Current",
+          "source": {
+            "primary_non_startech_url": "https://checkout.bluettipower.eu/ro/collections/all",
+            "source_type": "manufacturer_or_non_startech_retailer",
+            "startech_present_in_original_catalog": false
+          },
+          "specs": {
+            "ac_output_w": 1500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 900,
+            "battery_chemistry": "Sodium-ion",
+            "ac_input_w": null,
+            "solar_input_w": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null
           }
         }
       ]

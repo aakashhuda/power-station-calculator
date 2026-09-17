@@ -366,11 +366,23 @@
   }
 
   function productMetaHTML(p) {
-    var parts = [];
-    if (typeof p.capacityWh === 'number') parts.push(fmt(p.capacityWh) + ' Wh');
-    if (typeof p.outputW === 'number') parts.push(fmt(p.outputW) + ' W out');
+    var parts = [
+      (typeof p.capacityWh === 'number' ? fmt(p.capacityWh) + ' Wh' : '— Wh'),
+      (typeof p.outputW === 'number' ? fmt(p.outputW) + ' W out' : '— W out')
+    ];
     if (typeof p.peakW === 'number') parts.push(fmt(p.peakW) + ' W peak');
     return parts.map(function (part) { return esc(part); }).join(' &#183; ');
+  }
+
+  /* Every field the source listing does not state stays blank on the form, so
+     name them up front instead of letting validation surprise the user. */
+  function missingSpecLabels(p) {
+    var missing = [];
+    if (typeof p.capacityWh !== 'number') missing.push('capacity');
+    if (typeof p.outputW !== 'number') missing.push('continuous output');
+    if (typeof p.acInputW !== 'number') missing.push('AC input');
+    if (typeof p.solarInputW !== 'number') missing.push('solar input');
+    return missing;
   }
 
   /* A spec the source listing does not state shows as a dash here, which is the
@@ -391,8 +403,23 @@
     catalogBrandSelect.value = catalogBrand;
   }
 
-  /* Search runs inside the selected brand. Every whitespace-separated term has to
-     match, so "delta 2" finds "DELTA 2 Max" without also matching "DELTA Pro". */
+  /* Matches on model, full name and chemistry. Every whitespace-separated term has
+     to match, so "delta 2" finds "DELTA 2 Max" without also matching "DELTA Pro". */
+  function matchesQuery(p, terms) {
+    var haystack = [p.model, p.full, p.chemistry].filter(Boolean).join(' ').toLowerCase();
+    return terms.every(function (term) { return haystack.indexOf(term) !== -1; });
+  }
+
+  /* Plain substring matching would rank "Premium 150 AC180P" above "AC180" for the
+     query "ac180", which matters because Enter takes the top match. Exact and
+     prefix model hits therefore sort to the front. */
+  function relevanceOf(p, query) {
+    var model = String(p.model).toLowerCase();
+    if (model === query) return 0;
+    if (model.indexOf(query) === 0) return 1;
+    return 2;
+  }
+
   function filteredProducts() {
     var brand = findBrand(catalogBrand);
     var products = brand ? brand.products : [];
@@ -400,10 +427,15 @@
     if (!query) return products;
 
     var terms = query.split(/\s+/);
-    return products.filter(function (p) {
-      var haystack = [p.model, p.full, p.chemistry].filter(Boolean).join(' ').toLowerCase();
-      return terms.every(function (term) { return haystack.indexOf(term) !== -1; });
-    });
+    return products
+      .map(function (p, index) { return { product: p, index: index }; })
+      .filter(function (entry) { return matchesQuery(entry.product, terms); })
+      .map(function (entry) {
+        entry.rank = relevanceOf(entry.product, query);
+        return entry;
+      })
+      .sort(function (a, b) { return a.rank - b.rank || a.index - b.index; })
+      .map(function (entry) { return entry.product; });
   }
 
   function updateSearchClear() {
@@ -438,9 +470,6 @@
     catalogList.innerHTML = products.map(function (p) {
       var selected = !!selectedProduct && selectedProduct.id === p.id;
       var added = isProductAdded(p.id);
-      var tags = '';
-      if (p.stock) tags += '<span class="pcard__tag">' + esc(p.stock) + '</span>';
-      if (added) tags += '<span class="pcard__tag pcard__tag--added">Added</span>';
 
       return '<button type="button" class="pcard' + (selected ? ' is-selected' : '') + (added ? ' is-added' : '') + '"' +
         ' data-product="' + esc(p.id) + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '">' +
@@ -450,18 +479,21 @@
         '</span>' +
         '<span class="pcard__meta">' + productMetaHTML(p) + '</span>' +
         '<span class="pcard__meta">' + productChargeHTML(p) + '</span>' +
-        (tags ? '<span class="pcard__tags">' + tags + '</span>' : '') +
+        (added ? '<span class="pcard__tags"><span class="pcard__tag pcard__tag--added">Added</span></span>' : '') +
         '</button>';
     }).join('');
   }
 
   function renderCatalogNote() {
-    var parts = ['Prefilled from the Star Tech Bangladesh catalog — every field stays editable.'];
+    var parts = ['Prefilled from the bundled catalog — every field stays editable.'];
     if (!catalogPriceMatchesCurrency()) {
       parts.push('Catalog prices are listed in ৳ (BDT), so price is left blank while you work in ' + currency + '.');
     }
-    if (selectedProduct && typeof selectedProduct.product.solarInputW !== 'number') {
-      parts.push('This model has no published solar input — enter it before adding.');
+    if (selectedProduct) {
+      var missing = missingSpecLabels(selectedProduct.product);
+      if (missing.length) {
+        parts.push('Not published for this model: ' + missing.join(', ') + ' — enter before adding.');
+      }
     }
     catalogNoteEl.textContent = parts.join(' ');
   }
@@ -489,8 +521,9 @@
 
     /* Land on whatever the listing could not supply; if nothing is missing the
        station is ready, so hand focus to the button that adds it. */
-    var missing = [acChargeInput, solarChargeInput].find(function (input) { return input.value === ''; });
-    (missing || stationSubmitBtn).focus();
+    var missingField = [capacityInput, outputInput, acChargeInput, solarChargeInput]
+      .find(function (input) { return input.value === ''; });
+    (missingField || stationSubmitBtn).focus();
   }
 
   function setFormMode(mode) {
