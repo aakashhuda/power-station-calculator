@@ -17,6 +17,18 @@
   var activeStationId = null;
   var toastTimer;
 
+  /* Bundled product catalog (public/catalog.js). Brands come from the Star Tech
+     Bangladesh listings; AC input and solar input are not published there, so
+     those two fields are always supplied by the user. */
+  var CATALOG = window.PSC_CATALOG && Array.isArray(window.PSC_CATALOG.brands)
+    ? window.PSC_CATALOG
+    : { brands: [] };
+
+  var formMode = 'catalog';
+  var catalogBrand = CATALOG.brands.length ? CATALOG.brands[0].name : '';
+  var catalogQuery = '';
+  var selectedProduct = null;
+
   var stationModal = document.getElementById('station-modal');
   var openModalBtn = document.getElementById('open-station-modal');
   var cancelModalBtn = document.getElementById('station-modal-cancel');
@@ -35,6 +47,18 @@
   var solarChargeInput = document.getElementById('station-solarcharge');
   var priceInput = document.getElementById('station-price');
   var priceLabelEl = document.getElementById('station-price-label');
+
+  var modalSubEl = document.getElementById('station-modal-sub');
+  var modeCatalogBtn = document.getElementById('mode-catalog');
+  var modeCustomBtn = document.getElementById('mode-custom');
+  var catalogPanel = document.getElementById('catalog-panel');
+  var catalogBrandSelect = document.getElementById('catalog-brand');
+  var catalogList = document.getElementById('catalog-list');
+  var catalogCountEl = document.getElementById('catalog-count');
+  var catalogNoteEl = document.getElementById('catalog-note');
+  var catalogSearchInput = document.getElementById('catalog-search');
+  var catalogSearchClear = document.getElementById('catalog-search-clear');
+  var stationSubmitBtn = document.getElementById('station-modal-submit');
 
   var deviceRows = document.getElementById('device-rows');
   var addDeviceBtn = document.getElementById('add-device');
@@ -295,6 +319,7 @@
       acChargeW: data.acChargeW,
       solarChargeW: data.solarChargeW,
       price: data.price,
+      catalogId: data.catalogId || null,
       calcs: {
         runtime: { done: false, loadWatts: null, hours: 0 },
         solar: { done: false, hours: 0 },
@@ -303,12 +328,214 @@
     };
   }
 
+  /* ---------- Catalog picker ---------- */
+
+  function catalogBrands() {
+    return CATALOG.brands;
+  }
+
+  function findBrand(name) {
+    return catalogBrands().find(function (b) { return b.name === name; }) || null;
+  }
+
+  function findProduct(id) {
+    var found = null;
+    catalogBrands().some(function (b) {
+      return b.products.some(function (p) {
+        if (p.id !== id) return false;
+        found = { brand: b.name, product: p };
+        return true;
+      });
+    });
+    return found;
+  }
+
+  function isProductAdded(id) {
+    return stations.some(function (s) { return s.catalogId === id; });
+  }
+
+  /* Catalog prices come from a BDT source listing, so they are only prefilled
+     while the app is showing BDT — otherwise the number would be read as
+     whatever currency the user picked. */
+  function catalogPriceMatchesCurrency() {
+    return currency === 'Tk';
+  }
+
+  function bdtLabel(value) {
+    return '৳' + fmt(value);
+  }
+
+  function productMetaHTML(p) {
+    var parts = [];
+    if (typeof p.capacityWh === 'number') parts.push(fmt(p.capacityWh) + ' Wh');
+    if (typeof p.outputW === 'number') parts.push(fmt(p.outputW) + ' W out');
+    if (typeof p.peakW === 'number') parts.push(fmt(p.peakW) + ' W peak');
+    return parts.map(function (part) { return esc(part); }).join(' &#183; ');
+  }
+
+  /* A spec the source listing does not state shows as a dash here, which is the
+     same signal the station form gives when the field is left blank. */
+  function productChargeHTML(p) {
+    var parts = [
+      'AC in ' + (typeof p.acInputW === 'number' ? fmt(p.acInputW) + ' W' : '—'),
+      'Solar in ' + (typeof p.solarInputW === 'number' ? fmt(p.solarInputW) + ' W' : '—')
+    ];
+    if (p.chemistry) parts.push(p.chemistry);
+    return parts.map(function (part) { return esc(part); }).join(' &#183; ');
+  }
+
+  function renderCatalogBrands() {
+    catalogBrandSelect.innerHTML = catalogBrands().map(function (b) {
+      return '<option value="' + esc(b.name) + '">' + esc(b.name) + ' (' + b.products.length + ')</option>';
+    }).join('');
+    catalogBrandSelect.value = catalogBrand;
+  }
+
+  /* Search runs inside the selected brand. Every whitespace-separated term has to
+     match, so "delta 2" finds "DELTA 2 Max" without also matching "DELTA Pro". */
+  function filteredProducts() {
+    var brand = findBrand(catalogBrand);
+    var products = brand ? brand.products : [];
+    var query = catalogQuery.trim().toLowerCase();
+    if (!query) return products;
+
+    var terms = query.split(/\s+/);
+    return products.filter(function (p) {
+      var haystack = [p.model, p.full, p.chemistry].filter(Boolean).join(' ').toLowerCase();
+      return terms.every(function (term) { return haystack.indexOf(term) !== -1; });
+    });
+  }
+
+  function updateSearchClear() {
+    catalogSearchClear.hidden = catalogQuery === '';
+  }
+
+  function resetCatalogSearch() {
+    catalogQuery = '';
+    catalogSearchInput.value = '';
+    updateSearchClear();
+  }
+
+  function renderCatalogList() {
+    var brand = findBrand(catalogBrand);
+    var listed = brand ? brand.products : [];
+    var products = filteredProducts();
+    var query = catalogQuery.trim();
+
+    catalogCountEl.textContent = !listed.length
+      ? ''
+      : query
+        ? '· ' + products.length + ' of ' + listed.length
+        : '· ' + listed.length + (listed.length === 1 ? ' station' : ' stations');
+
+    if (!products.length) {
+      catalogList.innerHTML = '<p class="plist__empty">' + (query
+        ? 'No models in ' + esc(catalogBrand) + ' match “' + esc(query) + '”.'
+        : 'No stations listed for this brand.') + '</p>';
+      return;
+    }
+
+    catalogList.innerHTML = products.map(function (p) {
+      var selected = !!selectedProduct && selectedProduct.id === p.id;
+      var added = isProductAdded(p.id);
+      var tags = '';
+      if (p.stock) tags += '<span class="pcard__tag">' + esc(p.stock) + '</span>';
+      if (added) tags += '<span class="pcard__tag pcard__tag--added">Added</span>';
+
+      return '<button type="button" class="pcard' + (selected ? ' is-selected' : '') + (added ? ' is-added' : '') + '"' +
+        ' data-product="' + esc(p.id) + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '">' +
+        '<span class="pcard__row">' +
+          '<span class="pcard__model">' + esc(p.model) + '</span>' +
+          '<span class="pcard__price">' + (typeof p.price === 'number' ? esc(bdtLabel(p.price)) : '—') + '</span>' +
+        '</span>' +
+        '<span class="pcard__meta">' + productMetaHTML(p) + '</span>' +
+        '<span class="pcard__meta">' + productChargeHTML(p) + '</span>' +
+        (tags ? '<span class="pcard__tags">' + tags + '</span>' : '') +
+        '</button>';
+    }).join('');
+  }
+
+  function renderCatalogNote() {
+    var parts = ['Prefilled from the Star Tech Bangladesh catalog — every field stays editable.'];
+    if (!catalogPriceMatchesCurrency()) {
+      parts.push('Catalog prices are listed in ৳ (BDT), so price is left blank while you work in ' + currency + '.');
+    }
+    if (selectedProduct && typeof selectedProduct.product.solarInputW !== 'number') {
+      parts.push('This model has no published solar input — enter it before adding.');
+    }
+    catalogNoteEl.textContent = parts.join(' ');
+  }
+
+  function selectCatalogProduct(id) {
+    var found = findProduct(id);
+    if (!found) return;
+
+    var p = found.product;
+    selectedProduct = { id: p.id, brand: found.brand, product: p };
+
+    nameInput.value = p.model || '';
+    brandInput.value = found.brand;
+    capacityInput.value = num(p.capacityWh);
+    outputInput.value = num(p.outputW);
+    /* Each field is assigned from the catalog rather than left alone, so a value
+       from a previously picked model can never linger behind a new choice. */
+    acChargeInput.value = num(p.acInputW);
+    solarChargeInput.value = num(p.solarInputW);
+    priceInput.value = catalogPriceMatchesCurrency() && typeof p.price === 'number' ? num(p.price) : '';
+
+    clearAddErrors();
+    renderCatalogList();
+    renderCatalogNote();
+
+    /* Land on whatever the listing could not supply; if nothing is missing the
+       station is ready, so hand focus to the button that adds it. */
+    var missing = [acChargeInput, solarChargeInput].find(function (input) { return input.value === ''; });
+    (missing || stationSubmitBtn).focus();
+  }
+
+  function setFormMode(mode) {
+    formMode = mode === 'custom' ? 'custom' : 'catalog';
+    var usingCatalog = formMode === 'catalog' && catalogBrands().length > 0;
+
+    catalogPanel.hidden = !usingCatalog;
+    modeCatalogBtn.classList.toggle('is-active', usingCatalog);
+    modeCustomBtn.classList.toggle('is-active', !usingCatalog);
+    modeCatalogBtn.setAttribute('aria-selected', usingCatalog ? 'true' : 'false');
+    modeCustomBtn.setAttribute('aria-selected', usingCatalog ? 'false' : 'true');
+    modalSubEl.textContent = usingCatalog
+      ? 'Pick a model and its specs are filled in, or enter them yourself.'
+      : 'Enter the specs from the manufacturer sheet.';
+
+    if (!usingCatalog) {
+      selectedProduct = null;
+      addForm.reset();
+      clearAddErrors();
+      resetCatalogSearch();
+      renderCatalogList();
+      renderCatalogNote();
+    }
+  }
+
   /* ---------- Station modal ---------- */
 
   function openStationModal() {
     stationModal.hidden = false;
     document.body.classList.add('is-modal-open');
-    nameInput.focus();
+
+    selectedProduct = null;
+    addForm.reset();
+    clearAddErrors();
+    resetCatalogSearch();
+    renderCatalogBrands();
+    renderCatalogList();
+    renderCatalogNote();
+    setFormMode(formMode);
+
+    if (formMode === 'catalog' && catalogBrands().length) {
+      catalogBrandSelect.focus();
+    } else {
+      nameInput.focus();
+    }
   }
 
   function closeStationModal(reset) {
@@ -317,6 +544,8 @@
     if (reset) {
       addForm.reset();
       clearAddErrors();
+      resetCatalogSearch();
+      selectedProduct = null;
     }
   }
 
@@ -653,6 +882,50 @@
       closeStationModal(true);
     });
 
+    modeCatalogBtn.addEventListener('click', function () {
+      setFormMode('catalog');
+    });
+
+    modeCustomBtn.addEventListener('click', function () {
+      setFormMode('custom');
+    });
+
+    catalogBrandSelect.addEventListener('change', function () {
+      catalogBrand = catalogBrandSelect.value;
+      selectedProduct = null;
+      /* A query typed for one brand usually matches nothing in the next, so a
+         brand change starts from a clean search. */
+      resetCatalogSearch();
+      renderCatalogList();
+      renderCatalogNote();
+    });
+
+    catalogSearchInput.addEventListener('input', function () {
+      catalogQuery = catalogSearchInput.value;
+      updateSearchClear();
+      renderCatalogList();
+    });
+
+    catalogSearchInput.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      /* Enter inside the form would submit it, so take the top match instead. */
+      e.preventDefault();
+      var first = catalogList.querySelector('.pcard');
+      if (first) selectCatalogProduct(first.dataset.product);
+    });
+
+    catalogSearchClear.addEventListener('click', function () {
+      resetCatalogSearch();
+      renderCatalogList();
+      catalogSearchInput.focus();
+    });
+
+    catalogList.addEventListener('click', function (e) {
+      var card = e.target.closest('[data-product]');
+      if (!card) return;
+      selectCatalogProduct(card.dataset.product);
+    });
+
     addDeviceBtn.addEventListener('click', function () {
       devices.push(blankDevice());
       recomputeAll();
@@ -783,7 +1056,8 @@
         continuousOutputW: continuousOutputW,
         acChargeW: acChargeW,
         solarChargeW: solarChargeW,
-        price: price
+        price: price,
+        catalogId: formMode === 'catalog' && selectedProduct ? selectedProduct.id : null
       });
 
       stations.push(station);
@@ -829,6 +1103,21 @@
     recomputeAll();
     updateDeviceUI();
     bindGlobalEvents();
+
+    if (catalogBrands().length) {
+      resetCatalogSearch();
+      renderCatalogBrands();
+      renderCatalogList();
+      renderCatalogNote();
+      setFormMode(formMode);
+    } else {
+      /* No catalog available — fall back to the custom form on its own. */
+      formMode = 'custom';
+      catalogPanel.hidden = true;
+      modeCatalogBtn.hidden = true;
+      modeCustomBtn.hidden = true;
+    }
+
     render();
   }
 

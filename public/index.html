@@ -157,9 +157,33 @@
     <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="station-modal-title">
       <div class="modal__head">
         <h2 id="station-modal-title">Add Power Station</h2>
-        <p>Enter the specs from the manufacturer sheet.</p>
+        <p id="station-modal-sub">Pick a model and its specs are filled in, or enter them yourself.</p>
       </div>
+
+      <div class="seg" role="tablist" aria-label="How to add a power station">
+        <button type="button" class="seg__btn is-active" id="mode-catalog" role="tab" aria-selected="true" aria-controls="catalog-panel">From Catalog</button>
+        <button type="button" class="seg__btn" id="mode-custom" role="tab" aria-selected="false">Custom</button>
+      </div>
+
       <form id="add-station-form" novalidate>
+        <div class="catalog" id="catalog-panel">
+          <div class="field">
+            <label for="catalog-brand">Brand</label>
+            <select id="catalog-brand"></select>
+          </div>
+          <div class="field">
+            <span class="catalog__label">Model <span class="catalog__count" id="catalog-count"></span></span>
+            <div class="search">
+              <input id="catalog-search" type="text" placeholder="Search this brand…" autocomplete="off" aria-label="Search models in the selected brand" />
+              <button type="button" class="search__clear" id="catalog-search-clear" aria-label="Clear search" hidden>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="plist" id="catalog-list" role="listbox" aria-label="Catalog power station models"></div>
+          </div>
+          <p class="catalog__note" id="catalog-note"></p>
+        </div>
+
         <div class="field">
           <label for="station-name">Name <span class="req">*</span></label>
           <input id="station-name" name="name" type="text" placeholder="EcoFlow DELTA 2" autocomplete="off" required />
@@ -191,7 +215,7 @@
       </form>
       <div class="modal__actions">
         <button type="button" class="btn btn--ghost" id="station-modal-cancel">Cancel</button>
-        <button type="submit" form="add-station-form" class="btn btn--primary">
+        <button type="submit" form="add-station-form" class="btn btn--primary" id="station-modal-submit">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
           Add Station
         </button>
@@ -216,7 +240,7 @@
         <h3>2. Check the Shared Settings</h3>
         <p>Pick the currency used for station prices, and adjust the derate factors if you want more optimistic or conservative recharge estimates. Typical values: solar 1.15–1.25, AC ~1.1.</p>
         <h3>3. Add Power Stations</h3>
-        <p>Click “+ Add Power Station” beside the station tabs and enter the specs from the manufacturer sheet: battery capacity, continuous AC output, AC input, solar input, and price. Required fields are marked with an asterisk (*). The station is added when you press “Add Station”; “Cancel” closes the form and clears it.</p>
+        <p>Click “+ Add Power Station” beside the station tabs. Choose “From Catalog” to pick a brand, then search or scroll its listed models — capacity, continuous AC output, AC input, solar input, and price are all filled in for you and stay editable. Choose “Custom” to enter every spec yourself. Required fields are marked with an asterisk (*). The station is added when you press “Add Station”; “Cancel” closes the form and clears it.</p>
         <h3>4. Read the Results</h3>
         <p>Each station tab shows its specs and three results that update automatically as you type:</p>
         <div class="formula">Runtime (h) ≈ (Capacity Wh × 0.85) ÷ Total Load W</div>
@@ -232,6 +256,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
+  <script src="catalog.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

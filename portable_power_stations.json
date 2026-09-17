@@ -1,0 +1,1018 @@
+{
+  "metadata": {
+    "title": "Portable Power Station Product Catalog",
+    "source": "Star Tech Bangladesh",
+    "source_type": "Star Tech brand category listings",
+    "currency": "BDT",
+    "country": "Bangladesh",
+    "scope": "Portable power stations only",
+    "collected_date": "2026-09-17",
+    "notes": [
+      "Products are limited to the seven brands requested by the user.",
+      "Only portable power stations are included; solar panels and other accessories are excluded.",
+      "Specifications are normalized from the specifications displayed on the Star Tech category/product listings available at collection time.",
+      "A null value means the corresponding specification was not stated in the source listing reviewed."
+    ],
+    "product_count": 38,
+    "brand_count": 7,
+    "input_power_update": {
+      "updated_date": "2026-09-18",
+      "fields_added": [
+        "ac_input_w",
+        "solar_input_w"
+      ],
+      "matched_products": 38,
+      "products_without_verified_solar_wattage": [],
+      "method": "Maximum charging/input power normalized to watts. Where the source supplied voltage/current together with an explicit maximum wattage, that published wattage was used. No unsupported wattage was fabricated."
+    }
+  },
+  "brands": [
+    {
+      "brand": "Anker",
+      "source_url": "https://www.startech.com.bd/anker-portable-power-station",
+      "products": [
+        {
+          "name": "Anker SOLIX C1000 Gen 2 2000W Portable Power Station",
+          "model": "SOLIX C1000 Gen 2",
+          "price_bdt": 82500,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 2000,
+            "peak_output_w": 3000,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Car",
+              "Solar",
+              "Generator",
+              "Car Alternator"
+            ],
+            "recharge_time": "100% in 49 min at 1600W",
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1200,
+            "solar_input_w": 600
+          }
+        },
+        {
+          "name": "Anker SOLIX C2000 Gen 2 2400W Portable Power Station",
+          "model": "SOLIX C2000 Gen 2",
+          "price_bdt": null,
+          "availability": "Up Coming",
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": 4000,
+            "battery_capacity_wh": 2048,
+            "battery_voltage_v": 51.2,
+            "battery_capacity_mah": 40000,
+            "battery_chemistry": "LFP",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Car",
+              "Solar",
+              "Gas Generator",
+              "Car Alternator"
+            ],
+            "recharge_time": "80% in 45 min; 100% in 58 min",
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1800,
+            "solar_input_w": 800
+          }
+        },
+        {
+          "name": "Anker SOLIX C300 300W Portable Power Station",
+          "model": "SOLIX C300",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": 600,
+            "battery_capacity_wh": 288,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Car",
+              "Solar",
+              "Type-C"
+            ],
+            "recharge_time": "80% in 50 min",
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 330,
+            "solar_input_w": 100
+          }
+        }
+      ]
+    },
+    {
+      "brand": "EcoFlow",
+      "source_url": "https://www.startech.com.bd/ecoflow-portable-power-station",
+      "products": [
+        {
+          "name": "EcoFlow RIVER 2 Portable Power Station",
+          "model": "RIVER 2",
+          "price_bdt": 24300,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": 600,
+            "battery_capacity_wh": 256,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120V 50Hz/60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car",
+              "Generator",
+              "Type-C"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 360,
+            "solar_input_w": 110
+          }
+        },
+        {
+          "name": "EcoFlow RIVER 3 Portable Power Station",
+          "model": "RIVER 3",
+          "price_bdt": 24500,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": 600,
+            "battery_capacity_wh": 245,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120V 60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car",
+              "Generator"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 320,
+            "solar_input_w": 110
+          }
+        },
+        {
+          "name": "Ecoflow River 2 Max Portable Power Station",
+          "model": "RIVER 2 Max",
+          "price_bdt": 43600,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": 1000,
+            "battery_capacity_wh": 512,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Car",
+              "Solar",
+              "Type-C"
+            ],
+            "recharge_time": "0-100% in 60 min",
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 660,
+            "solar_input_w": 220
+          }
+        },
+        {
+          "name": "EcoFlow RIVER 2 Pro Portable Power Station",
+          "model": "RIVER 2 Pro",
+          "price_bdt": 49890,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 800,
+            "peak_output_w": 1600,
+            "battery_capacity_wh": 768,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120V 50Hz/60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Car",
+              "Solar",
+              "Type-C"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 940,
+            "solar_input_w": 220
+          }
+        },
+        {
+          "name": "EcoFlow Delta 3 Air 1000 Portable Power Station",
+          "model": "DELTA 3 Air 1000",
+          "price_bdt": 52200,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": 1000,
+            "battery_capacity_wh": 960,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "230V 50Hz/60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "Generator",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 500,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "Ecoflow Delta 3 Portable Power Station",
+          "model": "DELTA 3",
+          "price_bdt": 73900,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": 2400,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "230V 50Hz/60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car Charge",
+              "Multi-Charging",
+              "Generator"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1500,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "EcoFlow Delta 3 Air 2000 Portable Power Station",
+          "model": "DELTA 3 Air 2000",
+          "price_bdt": 90250,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": 1500,
+            "battery_capacity_wh": 1920,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "230V 50Hz/60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "Generator",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1000,
+            "solar_input_w": 1000
+          }
+        },
+        {
+          "name": "Ecoflow Delta 3 Max Portable Power Station",
+          "model": "DELTA 3 Max",
+          "price_bdt": 117000,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": 3400,
+            "battery_capacity_wh": 2048,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220-240V 10A 50/60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car Charge",
+              "Generator"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 2300,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "EcoFlow DELTA Pro Portable Power Station",
+          "model": "DELTA Pro",
+          "price_bdt": 224000,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 3600,
+            "peak_output_w": 4500,
+            "battery_capacity_wh": 3600,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "5 outlets, 120V/20A",
+            "output_waveform": null,
+            "charging_methods": [
+              "Solar",
+              "Generator",
+              "Grid",
+              "Car"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1800,
+            "solar_input_w": 1600
+          }
+        },
+        {
+          "name": "Ecoflow Delta Pro 3 Portable Power Station",
+          "model": "DELTA Pro 3",
+          "price_bdt": 420990,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 4000,
+            "peak_output_w": 6000,
+            "battery_capacity_wh": 4096,
+            "battery_voltage_v": 51.2,
+            "battery_capacity_ah": 80,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120/240V 16.7A 60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "Grid",
+              "Solar",
+              "Generator",
+              "EV",
+              "RV/VAN",
+              "Car"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 2900,
+            "solar_input_w": 2600
+          }
+        },
+        {
+          "name": "EcoFlow DELTA Pro Ultra Portable Power Station",
+          "model": "DELTA Pro Ultra",
+          "price_bdt": 610490,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 7200,
+            "peak_output_w": null,
+            "battery_capacity_wh": 6144,
+            "battery_chemistry": "LFP",
+            "ac_voltage": "120V/240V 60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "EV",
+              "Gas",
+              "Grid",
+              "MultiCharge"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 3000,
+            "solar_input_w": 5600
+          }
+        },
+        {
+          "name": "EcoFlow RIVER 3 Plus Portable Power Station",
+          "model": "RIVER 3 Plus",
+          "price_bdt": 34900,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": 1200,
+            "xboost_output_w": 1200,
+            "battery_capacity_wh": 286,
+            "battery_capacity_mah": 89600,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car",
+              "Generator"
+            ],
+            "recharge_time": null,
+            "cycle_life": "3000 cycles to 80% capacity",
+            "ports": null,
+            "ac_input_w": 360,
+            "solar_input_w": 220
+          }
+        },
+        {
+          "name": "EcoFlow E980 Portable Power Station",
+          "model": "E980",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": 650,
+            "battery_capacity_wh": 980,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "4 outlets, 230V AC",
+            "output_waveform": null,
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "4 AC outlets",
+            "ac_input_w": 650,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "EcoFlow RIVER 3 Max Plus Portable Power Station",
+          "model": "RIVER 3 Max Plus",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": 1200,
+            "xboost_output_w": 1200,
+            "battery_capacity_wh": 858,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car",
+              "Generator"
+            ],
+            "recharge_time": null,
+            "cycle_life": "3000 cycles to 80% capacity",
+            "ports": null,
+            "ac_input_w": 360,
+            "solar_input_w": 220
+          }
+        },
+        {
+          "name": "Ecoflow Delta 2 Portable Power Station",
+          "model": "DELTA 2",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": 2400,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "6 outlets, 230V AC",
+            "output_waveform": null,
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "DC",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "6 AC outlets",
+            "ac_input_w": 1200,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "EcoFlow E2000 Portable Power Station",
+          "model": "E2000",
+          "price_bdt": 106890,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": 3400,
+            "battery_capacity_wh": 2016,
+            "battery_voltage_v": 50.4,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "6 outlets, 230V AC 50Hz/60Hz",
+            "output_waveform": null,
+            "charging_methods": [
+              "Grid",
+              "Solar",
+              "Generator",
+              "Car"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "6 AC outlets",
+            "ac_input_w": 2000,
+            "solar_input_w": 800
+          }
+        },
+        {
+          "name": "Ecoflow Delta 2 Max Portable Power Station",
+          "model": "DELTA 2 Max",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 2400,
+            "peak_output_w": 3400,
+            "battery_capacity_wh": 2016,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "6 outlets, 230V AC",
+            "output_waveform": null,
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "6 AC outlets",
+            "ac_input_w": 1800,
+            "solar_input_w": 1000
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Marsriva",
+      "source_url": "https://www.startech.com.bd/marsriva-portable-power-station",
+      "products": [
+        {
+          "name": "Marsriva MP3S 300W Portable Power Station",
+          "model": "MP3S",
+          "price_bdt": 17250,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": null,
+            "battery_capacity_wh": 268.8,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220-230VAC 50-60Hz",
+            "output_waveform": "Simulated Sine Wave",
+            "charging_methods": [
+              "DC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 90,
+            "solar_input_w": null
+          }
+        },
+        {
+          "name": "Marsriva MP6 Plus 600W Portable Power Station",
+          "model": "MP6 Plus",
+          "price_bdt": 40000,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": 1200,
+            "battery_capacity_wh": 512,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": "3000+ cycles to 70% EOL",
+            "ports": "1 x AC, 1 x DC, 2 x USB, 2 x Type-C",
+            "ac_input_w": 600,
+            "solar_input_w": 300
+          }
+        },
+        {
+          "name": "Marsriva MP10 1000W Portable Power Station",
+          "model": "MP10",
+          "price_bdt": 55500,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": 2000,
+            "battery_capacity_wh": 1176,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120-230VAC 60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "AC",
+              "Car Charger",
+              "Solar"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "2 x USB, 1 x Type-C, car output, 2 x DC5521",
+            "ac_input_w": 800,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "Marsriva MP6 Pro 600W Portable Power Station",
+          "model": "MP6 Pro",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": 1200,
+            "battery_capacity_wh": 627.2,
+            "battery_chemistry": null,
+            "ac_voltage": "120V or 230V 60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 300,
+            "solar_input_w": 200
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Hithium",
+      "source_url": "https://www.startech.com.bd/hithium-portable-power-station",
+      "products": [
+        {
+          "name": "Hithium HeroEE 1 1kWh Portable Power Station",
+          "model": "HeroEE 1",
+          "price_bdt": 27990,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 200,
+            "peak_output_w": 400,
+            "battery_capacity_wh": 1004.8,
+            "battery_chemistry": "LiFePO4",
+            "battery_cell_capacity": "314Ah",
+            "ac_voltage": "220-240V 50Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 200,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "Hithium HeroEE MaxPower 8 AIO 5kW Portable Power Station",
+          "model": "HeroEE MaxPower 8 AIO",
+          "price_bdt": 262000,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 5000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 8038.4,
+            "battery_chemistry": "LiFePO4",
+            "battery_cell_capacity": "314Ah",
+            "ac_voltage": "230VAC 50Hz/60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "Generator",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 5000,
+            "solar_input_w": 9000
+          }
+        },
+        {
+          "name": "Hithium HeroEE Light 1 500W Portable Power Station",
+          "model": "HeroEE Light 1",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": 800,
+            "battery_capacity_wh": 1004.8,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220-240V 50Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 500,
+            "solar_input_w": 300
+          }
+        },
+        {
+          "name": "Hithium HeroEE 2 2kWh Portable Power Station",
+          "model": "HeroEE 2",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 1000,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2009.6,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "230V AC 50Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 1000,
+            "solar_input_w": 450
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Oraimo",
+      "source_url": "https://www.startech.com.bd/oraimo-portable-power-station",
+      "products": [
+        {
+          "name": "Oraimo Energy KILI 500W Portable Power Station (OPS-5102)",
+          "model": "Energy KILI",
+          "mpn": "OPS-5102",
+          "price_bdt": 39990,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1004.8,
+            "battery_voltage_v": 3.2,
+            "battery_capacity_ah": 314,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "230V AC 50/60Hz",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Grid/Wall",
+              "Solar/PV"
+            ],
+            "solar_input_w": 400,
+            "ac_input_w": 1000,
+            "recharge_time": null,
+            "cycle_life": 6000,
+            "ups_transfer_time": "0.02s",
+            "noise_level": "Low",
+            "ports": {
+              "ac": "2 x AC outlets, 500W",
+              "dc": "2 x DC5521, 60W",
+              "usb_a": "2 x USB-A, 15W",
+              "type_c": "1 x Type-C, 15W"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Bluetti",
+      "source_url": "https://www.startech.com.bd/bluetti-portable-power-station",
+      "products": [
+        {
+          "name": "BLUETTI Premium 30 V2 600W Portable Power Station",
+          "model": "Premium 30 V2",
+          "price_bdt": 29900,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 600,
+            "peak_output_w": 1500,
+            "battery_capacity_wh": 320,
+            "battery_capacity_ah": 20,
+            "battery_chemistry": null,
+            "ac_voltage": null,
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": "2 x Type-C, 2 x USB-A, 1 x 12V/10A, 2 x 12V/5A",
+            "ac_input_w": 980,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "BLUETTI Premium 100 V2 2000W Portable Power Station",
+          "model": "Premium 100 V2",
+          "price_bdt": 73600,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 2000,
+            "peak_output_w": 2700,
+            "battery_capacity_wh": 1024,
+            "battery_chemistry": null,
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": 4000,
+            "bidirectional_inverter": true,
+            "ports": null,
+            "ac_input_w": 2300,
+            "solar_input_w": 1000
+          }
+        },
+        {
+          "name": "BLUETTI Premium 150 AC180P 1800W Portable Power Station",
+          "model": "Premium 150 AC180P",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 1800,
+            "peak_output_w": 2700,
+            "battery_capacity_wh": 1440,
+            "battery_chemistry": null,
+            "ac_voltage": null,
+            "output_waveform": null,
+            "charging_methods": null,
+            "recharge_time": null,
+            "cycle_life": 3500,
+            "bidirectional_inverter": true,
+            "ports": null,
+            "ac_input_w": 1440,
+            "solar_input_w": 500
+          }
+        },
+        {
+          "name": "BLUETTI Premium 200 V2 2700W Portable Power Station",
+          "model": "Premium 200 V2",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 2700,
+            "peak_output_w": null,
+            "battery_capacity_wh": 2073.6,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "120V/20A",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "AC",
+              "Solar",
+              "Car",
+              "Generator",
+              "Lead Battery",
+              "AC+Solar"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 2300,
+            "solar_input_w": 1000
+          }
+        }
+      ]
+    },
+    {
+      "brand": "EcoSONIC",
+      "source_url": "https://www.startech.com.bd/ecosonic-portable-power-station",
+      "products": [
+        {
+          "name": "EcoSONIC SL82-L2 300W Portable Power Station With Solar Panel",
+          "model": "SL82-L2",
+          "price_bdt": 13310,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 300,
+            "peak_output_w": null,
+            "battery_capacity_wh": 230,
+            "battery_voltage_v": 12.8,
+            "battery_capacity_ah": 18,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220V",
+            "output_waveform": "Modified Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 200,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "EcoSONIC AP-500 500W Portable Power Station With Solar Panel",
+          "model": "AP-500",
+          "price_bdt": 26070,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 537.6,
+            "battery_voltage_v": 12.8,
+            "battery_capacity_ah": 42,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220V",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 200,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "EcoSONIC SL63-L2 800W Portable Power Station With Solar Panel",
+          "model": "SL63-L2",
+          "price_bdt": 42999,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 800,
+            "peak_output_w": null,
+            "battery_capacity_wh": 768,
+            "battery_voltage_v": 12.8,
+            "battery_capacity_ah": 60,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220V",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "Car",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 200,
+            "solar_input_w": 200
+          }
+        },
+        {
+          "name": "EcoSONIC AP-1500 1500W Portable Power Station With Solar Panel",
+          "model": "AP-1500",
+          "price_bdt": 88550,
+          "availability": "In Stock",
+          "specs": {
+            "ac_output_w": 1500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 1484.8,
+            "battery_voltage_v": 25.6,
+            "battery_capacity_ah": 58,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220V",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 584,
+            "solar_input_w": 450
+          }
+        },
+        {
+          "name": "EcoSONIC AP-3500 3500W Portable Power Station",
+          "model": "AP-3500",
+          "price_bdt": null,
+          "availability": "Out Of Stock",
+          "specs": {
+            "ac_output_w": 3500,
+            "peak_output_w": null,
+            "battery_capacity_wh": 3840,
+            "battery_voltage_v": 25.6,
+            "battery_capacity_ah": 150,
+            "battery_chemistry": "LiFePO4",
+            "ac_voltage": "220V",
+            "output_waveform": "Pure Sine Wave",
+            "charging_methods": [
+              "Solar",
+              "AC Electricity"
+            ],
+            "recharge_time": null,
+            "cycle_life": null,
+            "ports": null,
+            "ac_input_w": 584,
+            "solar_input_w": 1200
+          }
+        }
+      ]
+    }
+  ]
+}
