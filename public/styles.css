@@ -1908,11 +1908,14 @@ body.is-modal-open {
     background: transparent;
   }
 
+  /* The label stays hard left and everything after it — the value, and the
+     magnitude bar where the column has one — hugs the right edge. space-between
+     spaced all three items evenly, which stranded the value mid-row. */
   .compare-table td,
   .compare-table td:nth-child(n + 5) {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
     padding: 10px 0;
     text-align: right;
@@ -1923,12 +1926,21 @@ body.is-modal-open {
   .compare-table td::before {
     content: attr(data-label);
     flex: 0 0 auto;
+    margin-right: auto;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     text-align: left;
     color: var(--smoke);
+  }
+
+  /* The bar track measures zero width in this card layout (its fill is a
+     percentage of an indefinite width), so it renders nothing but still claims a
+     16px gap — which held three of the seven values off the right edge. Dropping
+     it changes nothing on screen and lets every value sit flush. */
+  .compare-table td .compare-bar {
+    display: none;
   }
 
   /* Station name heads the card. */
@@ -1941,13 +1953,30 @@ body.is-modal-open {
     border-bottom: 1px solid var(--fog);
   }
 
+  /* The card heading is a plain block here, so the name and brand would sit on
+     one line with no gap unless each is told to be a block of its own. */
+  .compare-station__name,
+  .compare-station__brand {
+    display: block;
+  }
+
+  /* Block layout has no gap property, so the brand carries its own spacing. */
+  .compare-station__brand {
+    margin-top: 4px;
+  }
+
   .compare-table td:first-child::before {
     display: none;
   }
 
+  /* Each row is its own card in this layout, so the two rules that tidy the
+     bottom edge of one continuous table — the last row, and the last cell in a
+     row — would strip the separators out of the final card entirely. Both are
+     restored here; the desktop table keeps them. */
+  .compare-table tbody tr:last-child td,
   .compare-table td:last-child {
-    padding-bottom: 0;
-    border-bottom: none;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ash);
   }
 }
 
