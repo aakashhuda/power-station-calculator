@@ -389,7 +389,8 @@ img {
 }
 
 .field input[type="number"],
-.device-table input[type="number"] {
+.device-table input[type="number"],
+.same-time__field input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -397,7 +398,9 @@ img {
 .field input[type="number"]::-webkit-outer-spin-button,
 .field input[type="number"]::-webkit-inner-spin-button,
 .device-table input[type="number"]::-webkit-outer-spin-button,
-.device-table input[type="number"]::-webkit-inner-spin-button {
+.device-table input[type="number"]::-webkit-inner-spin-button,
+.same-time__field input[type="number"]::-webkit-outer-spin-button,
+.same-time__field input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -438,6 +441,97 @@ img {
 .field.is-invalid select {
   background: var(--paper);
   border-color: var(--ink);
+}
+
+/* ---------- Appliance suggestions & shared backup time ---------- */
+
+.same-time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--mist);
+  border: 1px solid var(--ash);
+  border-radius: var(--r-input);
+}
+
+.same-time__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--graphite);
+  cursor: pointer;
+}
+
+.same-time__toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--charcoal);
+  cursor: pointer;
+}
+
+.same-time__field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.same-time__field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--graphite);
+}
+
+.same-time__field input {
+  width: 88px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--ash);
+  border-radius: var(--r-input);
+}
+
+.same-time__field input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(21, 22, 25, 0.08);
+}
+
+/* Until the box is ticked the single field has nothing to drive. */
+.same-time__field input:disabled {
+  color: var(--pewter);
+  background: transparent;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* A suggested wattage is dashed, so it reads as "not your number" without moving
+   the layout by a pixel. Hovering or focusing the field gives the real range. */
+.device-table input.is-est {
+  border-style: dashed;
+  border-color: var(--graphite);
+  cursor: help;
+}
+
+/* Hours driven by the shared backup time are shown rather than edited. */
+.device-table input[readonly] {
+  color: var(--smoke);
+  background: var(--mist);
+  cursor: not-allowed;
+}
+
+.device-legend {
+  margin-bottom: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--smoke);
 }
 
 /* ---------- Device table ---------- */
@@ -1195,6 +1289,54 @@ img {
 .rank-pick:focus .rank-pick__icon,
 .rank-pick.is-active .rank-pick__icon {
   opacity: 1;
+}
+
+/* ---------- Appliance dropdown ---------- */
+
+/* Flat by design — a hairline border in Ink rather than a drop shadow, which the
+   style system does not allow. */
+.appliance-menu {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  max-height: 264px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--paper);
+  border: 1px solid var(--graphite);
+  border-radius: var(--r-input);
+}
+
+.appliance-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-btn);
+  cursor: pointer;
+}
+
+.appliance-option:hover,
+.appliance-option.is-active {
+  background: var(--mist);
+}
+
+.appliance-option__name {
+  font-weight: 500;
+}
+
+.appliance-option__watts {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--smoke);
+  white-space: nowrap;
 }
 
 /* ---------- Metric tooltips ---------- */
@@ -2078,6 +2220,20 @@ body.is-modal-open {
     border-radius: var(--r-btn);
   }
 
+  /* Stack the shared-time control so its field keeps a usable width. */
+  .same-time {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .same-time__field {
+    justify-content: space-between;
+  }
+
+  .same-time__field input {
+    width: 120px;
+  }
+
   /* Keep the catalog list short so the station fields stay reachable. */
   .plist {
     max-height: 168px;
@@ -2254,7 +2410,8 @@ body.is-modal-open {
   }
 
   .info-tip,
-  .tooltip {
+  .tooltip,
+  .appliance-menu {
     display: none;
   }
 

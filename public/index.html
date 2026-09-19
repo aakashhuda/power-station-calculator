@@ -50,16 +50,28 @@
           <section class="card card--devices" aria-label="Daily energy consumption">
             <div class="card__head">
               <h2>Backup Load &amp; Energy Need</h2>
-              <p>List the devices you need to keep running during load shedding, and the backup hours you need each one to run. Together they describe your worst-case outage, and every power station below is measured against it.</p>
+              <p>List the devices you need to keep running during load shedding, and the backup hours you need each one to run. Together they describe your worst-case outage, and every power station below is measured against it. Don't know a device's wattage? Start typing its name and pick it from the list. If the outage is the same for everything, tick the box below and enter one backup time.</p>
             </div>
             <div class="formula">Device watts × quantity × backup hours = watt-hours (Wh)</div>
+
+            <div class="same-time">
+              <label class="same-time__toggle" for="same-hours">
+                <input type="checkbox" id="same-hours" />
+                <span>Same backup time for every device</span>
+              </label>
+              <div class="same-time__field">
+                <label for="outage-hours">Backup time (h)</label>
+                <input id="outage-hours" type="number" min="0" step="0.5" placeholder="3" inputmode="decimal" disabled />
+              </div>
+            </div>
+
             <div class="table-wrap">
               <table class="device-table">
                 <thead>
                   <tr>
-                    <th>Device</th>
-                    <th>Qty</th>
-                    <th>Watts (W)</th>
+                    <th>Device <span class="req">*</span></th>
+                    <th>Qty <span class="req">*</span></th>
+                    <th>Watts (W) <span class="req">*</span></th>
                     <th>Hours (h)</th>
                     <th>Wh</th>
                     <th></th>
@@ -68,6 +80,14 @@
                 <tbody id="device-rows"></tbody>
               </table>
             </div>
+            <p class="device-legend" id="device-legend" hidden>
+              Dashed wattage is a typical figure from the appliance list — type over it to use your own.
+            </p>
+
+            <p class="device-legend" id="device-hours-hint" hidden>
+              Runtime already works from the load alone, so it is shown without backup hours. Add hours to a device when you also want total energy, coverage and the PDF report.
+            </p>
+
             <div class="device-total">
               <button type="button" class="btn btn--ghost btn--sm" id="add-device">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
@@ -237,6 +257,12 @@
         <h3>1. Describe Your Backup Load</h3>
         <p>Load shedding is why most people buy a power station, so start with the outage you actually expect. List the devices you need to keep running and the <strong>backup hours</strong> you need each one to run — your own estimate of how long an outage lasts for you. The card totals those into Total Load (watts) and Total Energy (watt-hours) for that worst case. These devices are shared, so every power station below is judged against the same outage.</p>
         <div class="formula">Device Wh = Watts × Qty × Backup Hours &nbsp;·&nbsp; Total Load (W) = sum of Watts × Qty</div>
+        <h3>Don't Know a Device's Wattage?</h3>
+        <p>You do not need to know the watts to use this. Start typing a device name in the <strong>Device</strong> column and pick it from the list — LED bulb, Ceiling fan, WiFi router, Phone charger, Refrigerator and more. The wattage is filled in for you and shown with a dashed border, so you can see it is a typical figure rather than your own. Every suggested value also states the realistic range for that appliance. Type any number over it and the dashes disappear — a figure you enter is never overwritten by a suggestion.</p>
+        <p>These are <strong>typical draws, not ratings off the label</strong>, and for two appliances those differ enough to matter. A phone draws its own charging rate, so a 45 W charger still only pulls about 15 W. A fridge's compressor runs roughly a third of the time, so it is better entered with fewer hours than a lower wattage. If you have the appliance to hand, its label or power adapter states the real figure — usually in watts, or as volts × amps.</p>
+        <h3>Same Outage Time for Everything?</h3>
+        <p>You can also skip hours altogether. <strong>Runtime is worked out from the total load, not from the hours</strong> — so the moment your devices have wattages, every station shows how long it will run them. Hours are what turn that load into total energy (Wh), and they are what the Coverage figure needs. Leave them blank and you still get runtime; the card tells you when hours are missing and what they would add.</p>
+        <p>During a power cut your devices usually all run for the same stretch. Tick <strong>“Same backup time for every device”</strong> and enter one number — it fills the Hours column for every row and locks those fields, so you only type it once. Untick the box and the Hours column becomes editable again with the values left in place. Leave it unticked if devices run for different lengths: a router on all night, a fridge cycling on and off.</p>
         <h3>2. Check the Shared Settings</h3>
         <p>Pick the currency used for station prices, and adjust the derate factors if you want more optimistic or more conservative recharge estimates. Typical values: solar 1.15–1.25, AC ~1.1.</p>
         <h3>3. Add Power Stations</h3>
@@ -274,11 +300,14 @@
     </div>
   </div>
 
+  <div id="appliance-menu" class="appliance-menu" role="listbox" aria-label="Suggested appliances" hidden></div>
+
   <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="catalog.js"></script>
+  <script src="appliances.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

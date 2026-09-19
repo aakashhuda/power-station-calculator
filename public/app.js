@@ -9,10 +9,13 @@
 
   var stations = [];
   var devices = [blankDevice()];
+  /* When set, one backup time applies to every device row. */
+  var sameHours = false;
+  var outageHours = '';
   var solarFactor = 1.2;
   var acFactor = 1.1;
   var currency = 'Tk';
-  var dailyTotals = { totalWh: 0, totalWatts: 0, deviceCount: 0 };
+  var dailyTotals = { totalWh: 0, totalWatts: 0, deviceCount: 0, missingHours: 0 };
 
   var activeStationId = null;
   var toastTimer;
@@ -32,6 +35,10 @@
   var CATALOG = window.PSC_CATALOG && Array.isArray(window.PSC_CATALOG.brands)
     ? window.PSC_CATALOG
     : { brands: [] };
+
+  /* Typical wattages for common appliances (public/appliances.js), used to fill the
+     Watts cell for people who know their devices but not what they draw. */
+  var APPLIANCES = Array.isArray(window.PSC_APPLIANCES) ? window.PSC_APPLIANCES : [];
 
   var formMode = 'catalog';
   var catalogBrand = CATALOG.brands.length ? CATALOG.brands[0].name : '';
@@ -80,6 +87,11 @@
   var addDeviceBtn = document.getElementById('add-device');
   var dailyWattsEl = document.getElementById('daily-watts');
   var dailyWhEl = document.getElementById('daily-wh');
+  var sameHoursInput = document.getElementById('same-hours');
+  var outageHoursInput = document.getElementById('outage-hours');
+  var deviceLegend = document.getElementById('device-legend');
+  var applianceMenu = document.getElementById('appliance-menu');
+  var deviceHoursHint = document.getElementById('device-hours-hint');
 
   var currencyInput = document.getElementById('currency');
   var solarFactorInput = document.getElementById('solar-factor');
@@ -101,7 +113,8 @@
   /* ---------- Persistence ---------- */
 
   function blankDevice() {
-    return { name: '', watts: '', hours: '', qty: '' };
+    /* est marks a wattage suggested from the appliance list rather than typed. */
+    return { name: '', watts: '', hours: '', qty: '', est: false };
   }
 
   function normalizeDevice(d) {
@@ -110,7 +123,8 @@
       name: d.name == null ? '' : d.name,
       watts: d.watts == null ? '' : d.watts,
       hours: d.hours == null ? '' : d.hours,
-      qty: d.qty == null ? '' : d.qty
+      qty: d.qty == null ? '' : d.qty,
+      est: d.est === true
     };
   }
 
@@ -137,6 +151,8 @@
         solarFactor = typeof data.solarFactor === 'number' && isFinite(data.solarFactor) ? data.solarFactor : 1.2;
         acFactor = typeof data.acFactor === 'number' && isFinite(data.acFactor) ? data.acFactor : 1.1;
         currency = CURRENCY_SYMBOLS[data.currency] ? data.currency : 'Tk';
+        sameHours = data.sameHours === true;
+        outageHours = typeof data.outageHours === 'string' ? data.outageHours : '';
         return;
       }
     } catch (e) { /* ignore */ }
@@ -146,6 +162,8 @@
     solarFactor = 1.2;
     acFactor = 1.1;
     currency = 'Tk';
+    sameHours = false;
+    outageHours = '';
   }
 
   function save() {
@@ -155,7 +173,9 @@
         devices: devices,
         solarFactor: solarFactor,
         acFactor: acFactor,
-        currency: currency
+        currency: currency,
+        sameHours: sameHours,
+        outageHours: outageHours
       }));
     } catch (e) { /* storage full or unavailable */ }
   }
@@ -360,17 +380,25 @@
     var totalWh = 0;
     var totalWatts = 0;
     var deviceCount = 0;
+    var missingHours = 0;
     devices.forEach(function (d) {
       var w = parseNum(d.watts);
+      if (!isFinite(w) || w <= 0) return;
+      var q = deviceQty(d);
       var h = parseNum(d.hours);
-      if (isFinite(w) && w > 0 && isFinite(h) && h > 0) {
-        var q = deviceQty(d);
-        totalWatts += w * q;
+      /* Load and energy are counted separately on purpose. Runtime is derived from
+         the load alone, so a device with a known wattage counts immediately —
+         someone who knows they want two fans backed up but has not worked out for
+         how long still gets a runtime. Hours only turn the load into energy. */
+      totalWatts += w * q;
+      deviceCount++;
+      if (isFinite(h) && h > 0) {
         totalWh += w * h * q;
-        deviceCount++;
+      } else {
+        missingHours++;
       }
     });
-    return { totalWh: totalWh, totalWatts: totalWatts, deviceCount: deviceCount };
+    return { totalWh: totalWh, totalWatts: totalWatts, deviceCount: deviceCount, missingHours: missingHours };
   }
 
   function calcRuntime(station, loadWatts) {
@@ -1404,17 +1432,143 @@
 
   /* ---------- Shared input rendering ---------- */
 
+  /* ---------- Appliance wattage suggestions ---------- */
+
+  function findAppliance(name) {
+    var wanted = String(name == null ? '' : name).trim().toLowerCase();
+    if (!wanted) return null;
+    return APPLIANCES.filter(function (a) { return a.name.toLowerCase() === wanted; })[0] || null;
+  }
+
+  /* The tooltip spells out the realistic range, because the suggested figure is an
+     expected draw rather than a nameplate rating — for some devices they differ. */
+  function applianceTip(device) {
+    var match = findAppliance(device.name);
+    if (!match) return 'Typical value from the appliance list. Type your own to replace it.';
+    return 'Typical value for ' + match.name + ' (' + fmt(match.min) + '–' + fmt(match.max) + ' W). Type your own to replace it.' +
+      (match.note ? ' ' + match.note : '');
+  }
+
+  /* ---------- Appliance dropdown ---------- */
+
+  /* A native <datalist> cannot be opened by script, so it only ever appeared once
+     the user started typing. This is a small listbox instead: it opens on hover or
+     focus of an empty Device field, and filters as the user types. */
+  var menuInput = null;
+  var menuIndex = -1;
+
+  function applianceMatches(query) {
+    var q = String(query == null ? '' : query).trim().toLowerCase();
+    if (!q) return APPLIANCES.slice();
+    return APPLIANCES.filter(function (a) { return a.name.toLowerCase().indexOf(q) !== -1; });
+  }
+
+  function renderApplianceMenu(query) {
+    var matches = applianceMatches(query);
+    if (!matches.length) return 0;
+    applianceMenu.innerHTML = matches.map(function (a) {
+      return '<button type="button" class="appliance-option" role="option" data-appliance="' + esc(a.name) + '">' +
+        '<span class="appliance-option__name">' + esc(a.name) + '</span>' +
+        '<span class="appliance-option__watts">' + fmt(a.watts) + ' W typical</span>' +
+        '</button>';
+    }).join('');
+    menuIndex = -1;
+    return matches.length;
+  }
+
+  function positionApplianceMenu(input) {
+    var anchor = input.getBoundingClientRect();
+    applianceMenu.style.left = Math.round(anchor.left) + 'px';
+    applianceMenu.style.width = Math.round(anchor.width) + 'px';
+    var below = anchor.bottom + 4;
+    var box = applianceMenu.getBoundingClientRect();
+    /* Flip above the field when there is no room underneath. */
+    applianceMenu.style.top = (below + box.height > window.innerHeight - 8
+      ? Math.round(Math.max(8, anchor.top - box.height - 4))
+      : Math.round(below)) + 'px';
+  }
+
+  function openApplianceMenu(input) {
+    if (!APPLIANCES.length) return;
+    /* An exact name means the user already landed on an appliance — there is
+       nothing left to suggest, and reopening here would fight the selection that
+       just filled the field. */
+    if (findAppliance(input.value)) { closeApplianceMenu(); return; }
+    if (renderApplianceMenu(input.value) === 0) { closeApplianceMenu(); return; }
+    menuInput = input;
+    applianceMenu.hidden = false;
+    positionApplianceMenu(input);
+  }
+
+  function closeApplianceMenu() {
+    menuInput = null;
+    menuIndex = -1;
+    applianceMenu.hidden = true;
+  }
+
+  function chooseAppliance(name) {
+    var input = menuInput;
+    if (!input) return;
+    input.value = name;
+    closeApplianceMenu();
+    /* Ride the normal name handler so the wattage suggestion takes the same path
+       as a typed name, including the estimate marker and its tooltip. */
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  }
+
+  function highlightApplianceOption(delta) {
+    var options = Array.prototype.slice.call(applianceMenu.querySelectorAll('.appliance-option'));
+    if (!options.length) return;
+    menuIndex = (menuIndex + delta + options.length) % options.length;
+    options.forEach(function (o, i) { o.classList.toggle('is-active', i === menuIndex); });
+    options[menuIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  function menuIsOpenFor(input) {
+    return menuInput === input;
+  }
+
+  function updateDeviceLegend() {
+    deviceLegend.hidden = !devices.some(function (d) { return d.est === true; });
+    /* Only worth saying once a load exists to compute a runtime from. */
+    deviceHoursHint.hidden = !(dailyTotals.totalWatts > 0 && dailyTotals.missingHours > 0);
+  }
+
+  /* ---------- Shared backup time ---------- */
+
+  function setSharedTimeInputs() {
+    sameHoursInput.checked = sameHours;
+    outageHoursInput.value = outageHours;
+    outageHoursInput.disabled = !sameHours;
+  }
+
+  /* The shared time is written into every device, so unticking the box leaves the
+     values in place rather than clearing work the user has done. */
+  function applySharedHours() {
+    if (!sameHours) return;
+    devices.forEach(function (d) { d.hours = outageHours; });
+  }
+
   function renderDeviceRows() {
+    closeApplianceMenu();
     deviceRows.innerHTML = devices.map(function (d, i) {
+      var wattsClasses = [];
+      if (isInvalidNumber('watts', d.watts)) wattsClasses.push('is-invalid');
+      if (d.est === true) wattsClasses.push('is-est');
       return '<tr data-device="' + i + '">' +
-        '<td class="device-cell device-cell--name"><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Laptop" autocomplete="off"></td>' +
-        '<td class="device-cell device-table__qty" data-label="Qty"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
-        '<td class="device-cell" data-label="Watts (W)"><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' + (isInvalidNumber('watts', d.watts) ? ' class="is-invalid"' : '') + '></td>' +
-        '<td class="device-cell" data-label="Hours (h)"><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' + (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td class="device-cell device-cell--name"><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Type or pick a device" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"></td>' +
+        '<td class="device-cell device-table__qty" data-label="Qty *"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
+        '<td class="device-cell" data-label="Watts (W) *"><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' +
+        (wattsClasses.length ? ' class="' + wattsClasses.join(' ') + '"' : '') +
+        (d.est === true ? ' data-tip="' + esc(applianceTip(d)) + '"' : '') + '></td>' +
+        '<td class="device-cell" data-label="Hours (h)"><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' +
+        (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + (sameHours ? ' readonly' : '') + '></td>' +
         '<td class="device-cell" data-label="Energy (Wh)" data-wh>—</td>' +
         '<td class="device-cell device-cell--remove"><button type="button" class="device-remove" data-remove="' + i + '" aria-label="Remove device">' + iconTrash() + '</button></td>' +
         '</tr>';
     }).join('');
+    updateDeviceLegend();
   }
 
   function updateDeviceUI() {
@@ -1426,9 +1580,18 @@
       var h = parseNum(d.hours);
       var wh = isFinite(w) && isFinite(h) && w > 0 && h > 0 ? w * h * deviceQty(d) : 0;
       row.querySelector('[data-wh]').textContent = wh > 0 ? fmt(wh) : '—';
+      /* With a shared time the row inputs mirror it in place, so typing stays in
+         the one field being edited instead of rebuilding the table. */
+      if (sameHours) {
+        var hoursInput = row.querySelector('input[data-field="hours"]');
+        if (hoursInput && hoursInput.value !== String(d.hours)) hoursInput.value = d.hours;
+      }
     });
     dailyWattsEl.textContent = fmt(dailyTotals.totalWatts) + ' W';
     dailyWhEl.textContent = fmt(dailyTotals.totalWh) + ' Wh';
+    /* Both hints depend on the recomputed totals, and typing hours changes them
+       without rebuilding the rows — so refresh them here, not only on a render. */
+    updateDeviceLegend();
   }
 
   function setSharedInputs() {
@@ -1492,7 +1655,9 @@
     });
 
     addDeviceBtn.addEventListener('click', function () {
-      devices.push(blankDevice());
+      var added = blankDevice();
+      if (sameHours) added.hours = outageHours;
+      devices.push(added);
       recomputeAll();
       renderDeviceRows();
       updateDeviceUI();
@@ -1502,16 +1667,153 @@
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
+    /* ---------- Appliance dropdown wiring ---------- */
+
+    function nameInputOf(target) {
+      return target && target.closest ? target.closest('input[data-field="name"]') : null;
+    }
+
+    deviceRows.addEventListener('mouseover', function (e) {
+      var input = nameInputOf(e.target);
+      /* Hovering only offers the list while the field is still empty, so it never
+         covers a device the user has already chosen. */
+      if (!input || input.value.trim() !== '' || menuIsOpenFor(input)) return;
+      openApplianceMenu(input);
+    });
+
+    deviceRows.addEventListener('mouseout', function (e) {
+      var input = nameInputOf(e.target);
+      if (!input) return;
+      /* Grace period so the pointer can travel from the field into the list. */
+      setTimeout(function () {
+        if (menuIsOpenFor(input) && !applianceMenu.matches(':hover')) closeApplianceMenu();
+      }, 180);
+    });
+
+    deviceRows.addEventListener('focusin', function (e) {
+      var input = nameInputOf(e.target);
+      if (input && input.value.trim() === '') openApplianceMenu(input);
+    });
+
+    deviceRows.addEventListener('keydown', function (e) {
+      var input = nameInputOf(e.target);
+      if (!input) return;
+      if (applianceMenu.hidden) {
+        if (e.key === 'Escape') closeApplianceMenu();
+        return;
+      }
+      if (e.key === 'ArrowDown') { e.preventDefault(); highlightApplianceOption(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); highlightApplianceOption(-1); }
+      else if (e.key === 'Escape') { closeApplianceMenu(); }
+      else if (e.key === 'Enter') {
+        var active = applianceMenu.querySelector('.appliance-option.is-active');
+        if (active) { e.preventDefault(); chooseAppliance(active.dataset.appliance); }
+      }
+    });
+
+    /* mousedown, not click: the field's blur would otherwise close the list first. */
+    applianceMenu.addEventListener('mousedown', function (e) {
+      var option = e.target.closest('[data-appliance]');
+      if (!option) return;
+      e.preventDefault();
+      chooseAppliance(option.dataset.appliance);
+    });
+
+    document.addEventListener('mousedown', function (e) {
+      if (applianceMenu.hidden) return;
+      if (e.target.closest('#appliance-menu') || nameInputOf(e.target)) return;
+      closeApplianceMenu();
+    });
+
+    window.addEventListener('scroll', closeApplianceMenu, true);
+
     deviceRows.addEventListener('input', function (e) {
       var row = e.target.closest('tr[data-device]');
       if (!row) return;
       var idx = Number(row.dataset.device);
       var field = e.target.dataset.field;
       if (!field || !devices[idx]) return;
-      devices[idx][field] = e.target.value;
+      var device = devices[idx];
+      device[field] = e.target.value;
+
+      if (field === 'watts') {
+        /* A typed figure is the user's own, so the suggestion no longer applies. */
+        device.est = false;
+        e.target.classList.remove('is-est');
+        e.target.removeAttribute('data-tip');
+        updateDeviceLegend();
+      }
+
+      if (field === 'name') {
+        openApplianceMenu(e.target);
+        var match = findAppliance(device.name);
+        var wattsInput = row.querySelector('input[data-field="watts"]');
+        var blankOrSuggested = String(device.watts).trim() === '' || device.est === true;
+
+        /* Landing on a known appliance means one of it. A blank quantity is only
+           ever a default — the arithmetic already treats it as 1 — so writing it
+           in makes the row read correctly and still leaves a typed count alone. */
+        if (match && String(device.qty).trim() === '') {
+          device.qty = '1';
+          var qtyInput = row.querySelector('input[data-field="qty"]');
+          if (qtyInput) qtyInput.value = '1';
+        }
+
+        if (match && blankOrSuggested) {
+          /* Fill a blank or still-suggested wattage — never a figure already typed. */
+          device.watts = String(match.watts);
+          device.est = true;
+          if (wattsInput) {
+            wattsInput.value = device.watts;
+            wattsInput.classList.add('is-est');
+            wattsInput.setAttribute('data-tip', applianceTip(device));
+          }
+          updateDeviceLegend();
+        } else if (!match && device.est === true) {
+          /* Renamed to something off the list: keep the number, drop the claim. */
+          device.est = false;
+          if (wattsInput) {
+            wattsInput.classList.remove('is-est');
+            wattsInput.removeAttribute('data-tip');
+          }
+          updateDeviceLegend();
+        }
+      }
+
       if (field !== 'name' && e.target.classList) {
         e.target.classList.toggle('is-invalid', isInvalidNumber(field, e.target.value));
       }
+      recomputeAll();
+      updateDeviceUI();
+      save();
+      render();
+    });
+
+    sameHoursInput.addEventListener('change', function () {
+      sameHours = sameHoursInput.checked;
+      if (sameHours) {
+        /* Seed from a row that already has hours, so ticking the box never blanks
+           work the user has already done. */
+        if (outageHours === '') {
+          var existing = devices.filter(function (d) { return String(d.hours).trim() !== ''; })[0];
+          if (existing) outageHours = String(existing.hours);
+        }
+        outageHoursInput.value = outageHours;
+      }
+      outageHoursInput.disabled = !sameHours;
+      applySharedHours();
+      recomputeAll();
+      renderDeviceRows();
+      updateDeviceUI();
+      save();
+      render();
+    });
+
+    outageHoursInput.addEventListener('input', function () {
+      outageHours = outageHoursInput.value;
+      var raw = outageHours.trim();
+      outageHoursInput.classList.toggle('is-invalid', raw !== '' && isInvalidNumber('hours', raw));
+      applySharedHours();
       recomputeAll();
       updateDeviceUI();
       save();
@@ -1684,11 +1986,14 @@
         solarFactor = 1.2;
         acFactor = 1.1;
         currency = 'Tk';
+        sameHours = false;
+        outageHours = '';
         activeStationId = null;
         recomputeAll();
         renderDeviceRows();
         updateDeviceUI();
         setSharedInputs();
+        setSharedTimeInputs();
         save();
         render();
         showToast('All data cleared');
@@ -1786,6 +2091,7 @@
     load();
     if (stations.length) activeStationId = stations[0].id;
     setSharedInputs();
+    setSharedTimeInputs();
     renderDeviceRows();
     recomputeAll();
     updateDeviceUI();
