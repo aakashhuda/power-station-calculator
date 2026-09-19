@@ -94,6 +94,7 @@
   var compareArea = document.getElementById('compare-area');
   var printReport = document.getElementById('print-report');
   var toast = document.getElementById('toast');
+  var tooltipEl = document.getElementById('tooltip');
   var clearAllBtn = document.getElementById('clear-all');
   var generateCompareBtn = document.getElementById('generate-compare');
 
@@ -274,6 +275,33 @@
     }, 2600);
   }
 
+  /* ---------- Metric tooltips ---------- */
+
+  var tooltipTarget = null;
+
+  /* Positioned below the icon, flipped above when there is no room, and clamped
+     to the viewport so it can never be cut off. */
+  function showTooltip(target) {
+    var text = target.getAttribute('data-tip');
+    if (!text) return;
+    tooltipEl.textContent = text;
+    tooltipEl.hidden = false;
+
+    var anchor = target.getBoundingClientRect();
+    var box = tooltipEl.getBoundingClientRect();
+    var left = anchor.left + anchor.width / 2 - box.width / 2;
+    left = Math.max(12, Math.min(left, window.innerWidth - box.width - 12));
+    var top = anchor.bottom + 8;
+    if (top + box.height > window.innerHeight - 12) top = Math.max(12, anchor.top - box.height - 8);
+    tooltipEl.style.left = Math.round(left) + 'px';
+    tooltipEl.style.top = Math.round(top) + 'px';
+  }
+
+  function hideTooltip() {
+    tooltipTarget = null;
+    tooltipEl.hidden = true;
+  }
+
   function setFieldError(input, message) {
     var field = input.closest('.field');
     if (!field) return;
@@ -306,6 +334,11 @@
   function iconWarn(size) {
     size = size || 14;
     return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>';
+  }
+
+  function iconInfo(size) {
+    size = size || 12;
+    return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>';
   }
 
   function iconEdit(size) {
@@ -919,15 +952,25 @@
      so a column's label, its sort key and its bar can never drift apart.
      `bar` is only set on metrics where a longer bar means better — barring the
      recharge times would draw "best" as the shortest bar and misread badly. */
+  /* `hint` is the single source for the ⓘ tooltip on the column heading, the ⓘ on
+     the matching Rank by button and the wording in the Guideline glossary. */
   var COMPARE_COLUMNS = [
-    { key: 'name', label: 'Power Station', sortable: false },
-    { key: 'price', label: 'Price', sortable: true, better: 'low' },
-    { key: 'perWh', label: 'Price / Wh', sortable: true, better: 'low' },
-    { key: 'capacity', label: 'Capacity', sortable: true, better: 'high', bar: true },
-    { key: 'coverage', label: 'Coverage', sortable: true, better: 'high', bar: true },
-    { key: 'runtime', label: 'Runtime', sortable: true, better: 'high', bar: true, best: true },
-    { key: 'solar', label: 'Solar Recharge', sortable: true, better: 'low', best: true },
-    { key: 'ac', label: 'AC Recharge', sortable: true, better: 'low', best: true }
+    { key: 'name', label: 'Power Station', sortable: false,
+      hint: 'The stations taking part in the comparison. Change any spec from its own tab.' },
+    { key: 'price', label: 'Price', sortable: true, better: 'low',
+      hint: 'What the station costs, in the currency set under Shared Settings.' },
+    { key: 'perWh', label: 'Price / Wh', sortable: true, better: 'low',
+      hint: 'Price ÷ capacity — the value you get per watt-hour. Lower is better.' },
+    { key: 'capacity', label: 'Capacity', sortable: true, better: 'high', bar: true,
+      hint: 'Energy the battery stores, in watt-hours. About 85% of it reaches your devices.' },
+    { key: 'coverage', label: 'Coverage', sortable: true, better: 'high', bar: true,
+      hint: 'Usable energy (capacity × 0.85) ÷ your total backup need. 1.0 exactly covers your outage.' },
+    { key: 'runtime', label: 'Runtime', sortable: true, better: 'high', bar: true, best: true,
+      hint: 'How long one charge runs your total load: (capacity × 0.85) ÷ total watts.' },
+    { key: 'solar', label: 'Solar Recharge', sortable: true, better: 'low', best: true,
+      hint: 'Time to refill from solar: (capacity ÷ solar input) × the solar derate factor.' },
+    { key: 'ac', label: 'AC Recharge', sortable: true, better: 'low', best: true,
+      hint: 'Time to refill from the wall: (capacity ÷ AC input) × the AC derate factor.' }
   ];
 
   var RANK_METRICS = [
@@ -1043,16 +1086,35 @@
       .map(function (entry) { return entry.station; });
   }
 
+  function columnHint(key) {
+    var col = COMPARE_COLUMNS.filter(function (c) { return c.key === key; })[0];
+    return col ? col.hint : '';
+  }
+
+  /* The ⓘ is a focusable span rather than a button: it sits beside the sort
+     button, not inside it (interactive content cannot nest), and it is reachable
+     by keyboard and by tap as well as hover. Its aria-label carries the whole
+     explanation, so the bubble is decorative to assistive tech. */
+  function hintHTML(label, hint) {
+    if (!hint) return '';
+    var text = label + ' — ' + hint;
+    return '<span class="info-tip" tabindex="0" data-tip="' + esc(text) + '" aria-label="' + esc(text) + '">' +
+      iconInfo(12) + '</span>';
+  }
+
   function compareHeadHTML() {
     var cells = COMPARE_COLUMNS.map(function (col) {
-      if (!col.sortable) return '<th scope="col">' + esc(col.label) + '</th>';
+      if (!col.sortable) {
+        return '<th scope="col"><span class="th-inner">' + esc(col.label) + hintHTML(col.label, col.hint) + '</span></th>';
+      }
       var active = comparisonSort.key === col.key;
       var state = active ? (comparisonSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
-      return '<th scope="col" aria-sort="' + state + '">' +
+      return '<th scope="col" aria-sort="' + state + '"><span class="th-inner">' +
         '<button type="button" class="compare-sort' + (active ? ' is-active' : '') + '" data-sort="' + col.key + '">' +
         esc(col.label) +
         '<span class="compare-sort__arrow" aria-hidden="true">' + (active ? (comparisonSort.dir === 'asc' ? '↑' : '↓') : '↕') + '</span>' +
-        '</button></th>';
+        '</button>' + hintHTML(col.label, col.hint) +
+        '</span></th>';
     }).join('');
     return '<thead><tr>' + cells + '</tr></thead>';
   }
@@ -1121,8 +1183,11 @@
   function rankControlsHTML() {
     var view = resolvedCompareView();
     var metrics = RANK_METRICS.map(function (m) {
-      return '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
-        '" data-metric="' + m.key + '">' + esc(m.label) + '</button>';
+      return '<span class="rank-pick-group">' +
+        '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
+        '" data-metric="' + m.key + '">' + esc(m.label) + '</button>' +
+        hintHTML(m.label, columnHint(m.key)) +
+        '</span>';
     }).join('');
     return '<div class="compare-rank__controls">' +
       '<div class="seg seg--view" role="tablist" aria-label="Comparison view">' +
@@ -1212,6 +1277,7 @@
   }
 
   function renderComparison() {
+    hideTooltip();
     if (stations.length === 0) {
       compareHint.textContent = 'Add a power station and complete the shared inputs to generate the comparison.';
       compareArea.innerHTML = '<div class="compare-empty">' +
@@ -1553,6 +1619,35 @@
 
     /* While the view is still automatic, crossing the breakpoint has to swap it.
        A pinned choice is left alone. */
+    /* Delegated on document: the comparison is rebuilt on every keystroke, so
+       per-element binding would have to be redone constantly. */
+    document.addEventListener('mouseover', function (e) {
+      var tip = e.target.closest('[data-tip]');
+      if (tip === tooltipTarget) return;
+      if (tip) { tooltipTarget = tip; showTooltip(tip); } else { hideTooltip(); }
+    });
+
+    document.addEventListener('mouseout', function (e) {
+      if (!tooltipTarget) return;
+      if (e.relatedTarget && tooltipTarget.contains(e.relatedTarget)) return;
+      hideTooltip();
+    });
+
+    /* Focus covers keyboard users and taps, which is how the tooltip is reached
+       on a touch screen. */
+    document.addEventListener('focusin', function (e) {
+      var tip = e.target.closest('[data-tip]');
+      if (tip) { tooltipTarget = tip; showTooltip(tip); }
+    });
+
+    document.addEventListener('focusout', hideTooltip);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hideTooltip();
+    });
+    /* A fixed bubble would be left behind by any scrolling, including the
+       comparison table's own scroll container. */
+    window.addEventListener('scroll', hideTooltip, true);
+
     var resizeTimer;
     window.addEventListener('resize', function () {
       if (compareView) return;

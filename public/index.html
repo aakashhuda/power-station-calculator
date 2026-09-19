@@ -249,10 +249,32 @@
         <p>0.85 is the inverter efficiency factor for AC output; DC loads may run longer. The derate factors cover real-world losses such as sun angle, panel temperature and charging losses. A warning appears if your total load exceeds a station's continuous AC output. The station summary also shows two derived figures: <strong>Coverage</strong> — how many days one charge covers your backup energy need — and <strong>Price / Wh</strong>, the value per watt-hour.</p>
         <h3>5. Compare and Save the Report</h3>
         <p>Once every included station has its inputs, the comparison appears. Click any column heading to rank by it, and click again to reverse the order; the blue bars show how much more or less a station offers at a glance. The longest runtime and the shortest solar and AC recharge times carry a green “Best” badge. Switch between “Ranked” and “All Specs” at any screen size — Ranked lists the stations best-first for whichever metric you pick (Runtime, Coverage, Capacity, Solar Recharge Time, AC Recharge Time or Price), and All Specs is the full table. On a phone the table becomes one card per station and Ranked leads by default, because a stack of cards cannot be compared. Untick “Include in comparison” on a station to keep it on the page without it taking part in the table. “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your backup load, each station's summary and the comparison table.</p>
+        <h3>6. What Each Comparison Column Means</h3>
+        <p>Hover, tap or keyboard-focus the ⓘ beside any column heading — or beside any button under “Rank by” — to see the same short explanation in place. Every station is measured against the same backup load, so the columns can be read straight across.</p>
+        <dl class="glossary">
+          <dt>Price</dt>
+          <dd>What the station costs, in the currency you chose under Shared Settings. If your stations are priced in different currencies the comparison says so instead of ranking them against each other, because those numbers are not comparable.</dd>
+          <dt>Price / Wh</dt>
+          <dd>Price divided by capacity — what you pay per watt-hour of storage. Lower is better, and it is usually the fairest way to compare stations of different sizes.</dd>
+          <dt>Capacity</dt>
+          <dd>The energy the battery can store, in watt-hours (Wh). Only about 85% of it reaches your devices through the AC inverter, which is why the runtime, coverage and recharge figures all start from capacity × 0.85.</dd>
+          <dt>Coverage</dt>
+          <dd>One charge's usable energy (capacity × 0.85) divided by your total backup energy need. A value of <strong>1.0 means the station covers your outage exactly</strong>; below 1.0 it falls short and you would need to recharge or trim your device list. Higher is better.</dd>
+          <dt>Runtime</dt>
+          <dd>How long one charge runs your whole load: (capacity × 0.85) ÷ total load in watts. It ignores the backup hours you entered, because it is a rate — how long the station lasts at that draw. Longer is better.</dd>
+          <dt>Solar Recharge</dt>
+          <dd>How long to refill from solar panels: (capacity ÷ solar input W) × the solar derate factor. Shorter is better. It assumes steady, full-strength sunlight, so treat it as a best case rather than a promise.</dd>
+          <dt>AC Recharge</dt>
+          <dd>How long to refill from a wall socket while the grid is up: (capacity ÷ AC input W) × the AC derate factor. Shorter is better, and it is the number that decides how quickly you can turn the station around between outages.</dd>
+        </dl>
+        <p>Columns that can be ranked show a small ↕ arrow; click the heading to sort by it and click again to reverse the order. The green “Best” pill marks the longest runtime and the shortest recharge times, and the blue bars show how each station compares with the best one in that column.</p>
+
         <p class="guideline__note">Your data is saved in this browser's local storage and restored when you return. “Clear All” in the navbar resets everything.</p>
       </div>
     </div>
   </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
