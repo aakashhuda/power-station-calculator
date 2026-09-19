@@ -934,8 +934,10 @@
     { key: 'runtime', label: 'Runtime', better: 'high' },
     { key: 'coverage', label: 'Coverage', better: 'high' },
     { key: 'capacity', label: 'Capacity', better: 'high' },
-    { key: 'solar', label: 'Solar', better: 'low' },
-    { key: 'ac', label: 'AC', better: 'low' },
+    /* Spelled out rather than abbreviated: these are the two labels users read
+       side by side when choosing what to rank by. */
+    { key: 'solar', label: 'Solar Recharge Time', better: 'low' },
+    { key: 'ac', label: 'AC Recharge Time', better: 'low' },
     { key: 'price', label: 'Price', better: 'low' }
   ];
 

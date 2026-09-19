@@ -49,10 +49,10 @@
         <div class="card-stack">
           <section class="card card--devices" aria-label="Daily energy consumption">
             <div class="card__head">
-              <h2>Daily Energy Consumption</h2>
-              <p>Devices are shared across every power station.</p>
+              <h2>Backup Load &amp; Energy Need</h2>
+              <p>List the devices you need to keep running during load shedding, and the backup hours you need each one to run. Together they describe your worst-case outage, and every power station below is measured against it.</p>
             </div>
-            <div class="formula">Device watts × quantity × hours used = watt-hours (Wh)</div>
+            <div class="formula">Device watts × quantity × backup hours = watt-hours (Wh)</div>
             <div class="table-wrap">
               <table class="device-table">
                 <thead>
@@ -234,21 +234,21 @@
         <p>How to use PowerStationCalc and how the numbers are calculated.</p>
       </div>
       <div class="guideline">
-        <h3>1. Enter Your Daily Energy Consumption</h3>
-        <p>List every device you plan to run with its quantity, watts, and hours used per day. These devices are shared across every power station, and the totals drive all runtime estimates.</p>
-        <div class="formula">Device Wh = Watts × Qty × Hours &nbsp;·&nbsp; Total Load (W) = sum of Watts × Qty</div>
+        <h3>1. Describe Your Backup Load</h3>
+        <p>Load shedding is why most people buy a power station, so start with the outage you actually expect. List the devices you need to keep running and the <strong>backup hours</strong> you need each one to run — your own estimate of how long an outage lasts for you. The card totals those into Total Load (watts) and Total Energy (watt-hours) for that worst case. These devices are shared, so every power station below is judged against the same outage.</p>
+        <div class="formula">Device Wh = Watts × Qty × Backup Hours &nbsp;·&nbsp; Total Load (W) = sum of Watts × Qty</div>
         <h3>2. Check the Shared Settings</h3>
-        <p>Pick the currency used for station prices, and adjust the derate factors if you want more optimistic or conservative recharge estimates. Typical values: solar 1.15–1.25, AC ~1.1.</p>
+        <p>Pick the currency used for station prices, and adjust the derate factors if you want more optimistic or more conservative recharge estimates. Typical values: solar 1.15–1.25, AC ~1.1.</p>
         <h3>3. Add Power Stations</h3>
         <p>Click “+ Add Power Station” beside the station tabs. Choose “From Catalog” to pick a brand, then search or scroll its listed models — the published specs are filled in for you and stay editable. Where a listing does not state a figure, that field is left for you to enter and the form says which ones. Choose “Custom” to enter every spec yourself. Required fields are marked with an asterisk (*). The station is added when you press “Add Station”; “Cancel” closes the form and clears it. To change a station later, press “Edit Specs” in its summary — the same form opens filled in, and “Save Changes” updates it in place, keeping its position in the comparison.</p>
         <h3>4. Read the Results</h3>
-        <p>Each station tab shows its specs and three results that update automatically as you type:</p>
+        <p>Each station tab shows its specs and three results, recomputed automatically whenever anything changes:</p>
         <div class="formula">Runtime (h) ≈ (Capacity Wh × 0.85) ÷ Total Load W</div>
         <div class="formula">Solar Recharge (h) ≈ (Capacity Wh ÷ Solar Input W) × Solar Derate Factor</div>
         <div class="formula">AC Recharge (h) ≈ (Capacity Wh ÷ AC Input W) × AC Derate Factor</div>
-        <p>0.85 is the inverter efficiency factor for AC output; DC loads may run longer. The derate factors cover real-world losses such as sun angle, panel temperature, and charging losses. A warning is shown if your total load exceeds a station's continuous AC output.</p>
-        <h3>5. Compare and Download the PDF</h3>
-        <p>Once every station's inputs are complete, the comparison builds a side-by-side table — your daily energy need is stated once above it, since it is the same for every station. Click any column heading to rank by it, and click again to reverse the order; the grey bars show how much more or less a station offers. The longest runtime and the shortest solar and AC recharge times are highlighted with a green Best badge. Two figures are derived for you: Coverage is how many days one charge covers your daily need, and Price / Wh is the value per watt-hour. Untick “Include in comparison” on a station to keep it on the page without it taking part in the table. Switch between “Ranked” and “All Specs” at any screen size: Ranked lists the stations best-first for whichever metric you pick, and All Specs is the full table. On a phone the table becomes one card per station, and Ranked leads by default because a stack of cards cannot be compared.</p> “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your daily consumption, each station's summary, and the comparison table.</p>
+        <p>0.85 is the inverter efficiency factor for AC output; DC loads may run longer. The derate factors cover real-world losses such as sun angle, panel temperature and charging losses. A warning appears if your total load exceeds a station's continuous AC output. The station summary also shows two derived figures: <strong>Coverage</strong> — how many days one charge covers your backup energy need — and <strong>Price / Wh</strong>, the value per watt-hour.</p>
+        <h3>5. Compare and Save the Report</h3>
+        <p>Once every included station has its inputs, the comparison appears. Click any column heading to rank by it, and click again to reverse the order; the blue bars show how much more or less a station offers at a glance. The longest runtime and the shortest solar and AC recharge times carry a green “Best” badge. Switch between “Ranked” and “All Specs” at any screen size — Ranked lists the stations best-first for whichever metric you pick (Runtime, Coverage, Capacity, Solar Recharge Time, AC Recharge Time or Price), and All Specs is the full table. On a phone the table becomes one card per station and Ranked leads by default, because a stack of cards cannot be compared. Untick “Include in comparison” on a station to keep it on the page without it taking part in the table. “Download PDF” opens the print dialog — choose “Save as PDF” to get a report with your backup load, each station's summary and the comparison table.</p>
         <p class="guideline__note">Your data is saved in this browser's local storage and restored when you return. “Clear All” in the navbar resets everything.</p>
       </div>
     </div>
