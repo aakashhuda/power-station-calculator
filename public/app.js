@@ -1183,11 +1183,17 @@
   function rankControlsHTML() {
     var view = resolvedCompareView();
     var metrics = RANK_METRICS.map(function (m) {
-      return '<span class="rank-pick-group">' +
-        '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
-        '" data-metric="' + m.key + '">' + esc(m.label) + '</button>' +
-        hintHTML(m.label, columnHint(m.key)) +
-        '</span>';
+      var hint = columnHint(m.key);
+      var text = m.label + ' — ' + hint;
+      /* The icon sits inside the pill, so the pill itself is the tooltip trigger.
+         A button cannot contain another focusable element, so the icon is purely
+         decorative and the explanation rides on the button's accessible name. */
+      return '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
+        '" data-metric="' + m.key + '"' +
+        (hint ? ' data-tip="' + esc(text) + '" aria-label="' + esc(text) + '"' : '') +
+        '>' + esc(m.label) +
+        (hint ? '<span class="rank-pick__icon" aria-hidden="true">' + iconInfo(12) + '</span>' : '') +
+        '</button>';
     }).join('');
     return '<div class="compare-rank__controls">' +
       '<div class="seg seg--view" role="tablist" aria-label="Comparison view">' +

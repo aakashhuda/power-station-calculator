@@ -1181,10 +1181,20 @@ img {
   margin-bottom: 16px;
 }
 
-.rank-pick-group {
+/* The metric icon sits inside the pill and inherits its colour, so it stays
+   legible on both the resting state and the active charcoal fill. */
+.rank-pick__icon {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  margin-left: 6px;
+  opacity: 0.6;
+  transition: opacity 140ms ease-out;
+}
+
+.rank-pick:hover .rank-pick__icon,
+.rank-pick:focus .rank-pick__icon,
+.rank-pick.is-active .rank-pick__icon {
+  opacity: 1;
 }
 
 /* ---------- Metric tooltips ---------- */
@@ -1228,6 +1238,9 @@ img {
 }
 
 .rank-pick {
+  /* Flex so the inline ⓘ sits on the label's baseline rather than below it. */
+  display: inline-flex;
+  align-items: center;
   padding: 6px 12px;
   font-family: inherit;
   font-size: 13px;
