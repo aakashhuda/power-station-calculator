@@ -11,21 +11,28 @@ Hellotime is a near-monochrome productivity surface: white canvas, near-black ty
 | Name          | Value                                                           | Role                                                                                                        |
 | ------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Ink           | `#151619`                                                       | Primary text, icon strokes, hairline borders, footer text — the dominant non-background color in the system |
-| Smoke         | `#7f8491`                                                       | Secondary/muted text, link text, subdued borders, placeholder labels — recedes so body copy reads first     |
+| Smoke         | `#6a6e79`                                                       | Secondary/muted text, link text, subdued borders, placeholder labels — recedes so body copy reads first     |
 | Fog           | `#c8cad0`                                                       | Card and component borders, subtle dividers, icon outlines at rest — the default hairline                   |
 | Ash           | `#e1e2e5`                                                       | Dividers between sections, secondary surface tint, input borders in resting state                           |
 | Mist          | `#f3f3f5`                                                       | Card surfaces, subtle elevated panels, button hover wash, input backgrounds                                 |
 | Paper         | `#ffffff`                                                       | Page canvas, nav background, inverted button text, heading reverse-color treatments                         |
 | Charcoal      | `#25272d`                                                       | Primary action button fill and border, nav top-strip emphasis — the only dark surface, reserved for CTAs    |
 | Graphite      | `#363940`                                                       | Nav link text color, slightly lifted from #151619 for a softer navigation feel                              |
-| Pewter        | `#b0b3bb`                                                       | Outlined button border at rest, ghost control stroke                                                        |
-| Signal Green  | `#059669`                                                       | Brand logo accent stroke, brand identity marker — vivid green checkmark against monochrome                  |
+| Pewter        | `#898c93`                                                       | Outlined button border at rest, ghost control stroke, resting input border                                  |
+| Signal Green  | `#07835d`                                                       | Brand logo accent stroke, brand identity marker — vivid green checkmark against monochrome                  |
 | Electric Blue | `linear-gradient(90deg, #0560fd 0%, #3a8dff 50%, #c3d9ff 100%)` | Brand accent — the gradient highlight on hero keywords; also product UI project bars and chart accents      |
+
+> **Contrast revision.** Smoke, Pewter and Signal Green were darkened to clear the
+> accessibility floor on the surfaces they are actually used on: Smoke carried body,
+> hint and table-header text at 3.74:1, Pewter identified every ghost button at 2.10:1,
+> and white on Signal Green sat at 3.77:1 inside the 13px "Best" badge. They are now
+> 5.10:1 on paper (4.60:1 on mist), 3.37:1 and 5.20:1. Hues and roles are unchanged —
+> the palette still reads as the same near-monochrome system, it is simply legible.
 
 ### Application UI note — the Best marker
 
 The calculator is the product UI this system describes, and it spends the entire accent
-budget on a single element: the **"Best" marker**, a Signal Green (#059669) pill on the
+budget on a single element: the **"Best" marker**, a Signal Green (#07835d) pill on the
 longest runtime and the shortest recharge times in the comparison table.
 
 This is a deliberate, narrow exception to "do not use colour for status or state". It is
@@ -104,7 +111,7 @@ Charcoal (#25272d) background, Paper (#ffffff) text at 14px/600, 8px border radi
 
 **Role:** Secondary action in nav or inline contexts
 
-Transparent background, Pewter (#b0b3bb) 1px border, Ink (#151619) text at 14px/500, 8px radius, 10px × 20px padding. Hover fills Mist (#f3f3f5). Used for nav-level CTAs and lower-priority actions.
+Transparent background, Pewter (#898c93) 1px border, Ink (#151619) text at 14px/500, 8px radius, 10px × 20px padding. Hover fills Mist (#f3f3f5). Used for nav-level CTAs and lower-priority actions.
 
 ### Hero Gradient Highlight Text
 
@@ -116,7 +123,7 @@ Text filled with the Electric Blue gradient (linear-gradient 90deg, #0560fd → 
 
 **Role:** First-fold conversion block
 
-Centered column on white canvas, 64–80px top padding. Eyebrow: small pill link 'A different kind of pricing →' with 1px Ink border, 9999px radius, 12px/500. Headline: 80px/700, centered, -1.6px tracking, with one gradient-highlighted phrase. Subtext: 18px/400 in Smoke (#7f8491), max-width ~640px. CTA: filled dark button centered below.
+Centered column on white canvas, 64–80px top padding. Eyebrow: small pill link 'A different kind of pricing →' with 1px Ink border, 9999px radius, 12px/500. Headline: 80px/700, centered, -1.6px tracking, with one gradient-highlighted phrase. Subtext: 18px/400 in Smoke (#6a6e79), max-width ~640px. CTA: filled dark button centered below.
 
 ### Product Screenshot Frame
 
@@ -164,7 +171,7 @@ Charcoal (#25272d) background, Paper (#ffffff) text, 16px radius, 32px padding. 
 
 ### Do
 
-- Set body copy at 16px/400 with 1.5 line-height in Ink (#151619); use Smoke (#7f8491) for anything that is metadata, helper, or secondary
+- Set body copy at 16px/400 with 1.5 line-height in Ink (#151619); use Smoke (#6a6e79) for anything that is metadata, helper, or secondary
 - Use 16px radius on all cards, sections, and image frames; use 8px radius on buttons, inputs, and nav elements
 - Use the Electric Blue gradient only on inline keyword highlights inside headlines — never as a button fill, never as a large background
 - Use Charcoal (#25272d) filled buttons as the single primary action per section; all other actions are ghost/outlined in Pewter

@@ -2,15 +2,25 @@
 
 :root {
   --ink: #151619;
-  --smoke: #7f8491;
+  /* Darkened from #7f8491, which measured 3.74:1 on paper — under the 4.5:1 floor
+     that every role below carries text at (hints, legends, table headers, the lede).
+     This is the smallest shift that clears it on both surfaces smoke sits on:
+     paper 5.10:1, mist 4.60:1. The hue is untouched; it still reads as the receding
+     grey DESIGN.md describes, it is simply legible now. */
+  --smoke: #6a6e79;
   --fog: #c8cad0;
   --ash: #e1e2e5;
   --mist: #f3f3f5;
   --paper: #ffffff;
   --charcoal: #25272d;
   --graphite: #363940;
-  --pewter: #b0b3bb;
-  --green: #059669;
+  /* Darkened from #b0b3bb (2.10:1). A ghost button's border is the only thing that
+     identifies the control, and non-text contrast needs 3:1: paper 3.37:1, mist 3.04:1. */
+  --pewter: #898c93;
+  /* Darkened from #059669, which put white at 3.77:1 — under 4.5:1 for the 13px
+     "Best" badge that is the one place this green carries text. Now 5.20:1, and the
+     logo mark reads stronger on paper for the same reason. */
+  --green: #07835d;
 
   --grad: linear-gradient(90deg, #0560fd 0%, #3a8dff 50%, #c3d9ff 100%);
 
@@ -225,20 +235,6 @@ img {
   margin-bottom: 48px;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  margin-bottom: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  border: 1px solid var(--ink);
-  border-radius: var(--r-pill);
-}
-
 .section-head h1 {
   font-size: clamp(36px, 5vw, 52px);
   font-weight: 700;
@@ -293,6 +289,20 @@ img {
   .grad {
     animation: none;
     will-change: auto;
+  }
+}
+
+/* ---------- Motion ---------- */
+
+/* This app is a tool, so its motion is feedback first: it says that a value moved,
+   that a list reordered, that something arrived. There is one entrance and it is
+   deliberately the same motion everywhere it is used — the comparison answering the
+   page's question, a station's results arriving, a dialog taking over — rather than
+   a different effect per component. The transition timings live on the elements. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
 }
 
@@ -589,6 +599,8 @@ img {
   white-space: nowrap;
 }
 
+/* Pewter, not Ash: on a paper card the Ash border measured 1.30:1, so the cells
+   read as blank space and there was nothing to say where to type. 3.37:1 now. */
 .device-table input {
   width: 100%;
   padding: 8px 10px;
@@ -596,7 +608,7 @@ img {
   font-size: 14px;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--ash);
+  border: 1px solid var(--pewter);
   border-radius: var(--r-btn);
   transition: border-color 160ms ease-out, background-color 160ms ease-out;
 }
@@ -816,11 +828,28 @@ img {
   overflow: hidden;
 }
 
+/* Same shape as the comparison bars: a ratio the element scales itself by, so the
+   bar never drives layout. No transition — the summary is rebuilt on every render,
+   so there is no previous length for it to travel from and the declared one would
+   never play. */
 .progress__bar {
   height: 100%;
   background: var(--charcoal);
   border-radius: var(--r-bar);
-  transition: width 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left center;
+}
+
+/* Switching station is the only navigation on this page, so it is the one place a
+   group entrance means something: the summary and its three tiles arrive together,
+   with a single 60ms offset between the two groups. It is re-triggered only when
+   the active station actually changes, never on a re-render. */
+.station-view.is-entering > * {
+  animation: enter-up 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.station-view.is-entering > *:nth-child(2) {
+  animation-delay: 60ms;
 }
 
 /* ---------- Station results ---------- */
@@ -831,29 +860,27 @@ img {
   gap: 16px;
 }
 
+/* The tiles carry no entrance of their own. Every keystroke re-renders this card,
+   so a per-tile animation replayed continuously and read as a flicker rather than
+   as arrival — the group entrance on a station switch below is the honest version. */
 .result-tile {
   display: flex;
   flex-direction: column;
   padding: 24px;
-  animation: rise 460ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.result-tile:nth-child(2) {
-  animation-delay: 70ms;
+/* Returning a value that moved. Applied by app.js only when the number actually
+   differs from the one last drawn, so a repaint stays still and a real change is
+   acknowledged. */
+.result-tile__value.is-updated,
+.device-total strong.is-updated {
+  animation: value-settle 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.result-tile:nth-child(3) {
-  animation-delay: 140ms;
-}
-
-@keyframes rise {
+@keyframes value-settle {
   from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    opacity: 0.4;
+    transform: translateY(4px);
   }
 }
 
@@ -916,6 +943,13 @@ img {
 
 .compare-card {
   padding: 24px;
+}
+
+/* The one authored arrival on this page. The comparison is the answer the whole page
+   exists to produce, so it is the only element that enters; it plays once, on the
+   render where the last missing input lands, and never on a re-render. */
+.compare-card.is-arriving {
+  animation: enter-up 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .compare-card__head {
@@ -1083,11 +1117,15 @@ img {
   gap: 6px;
 }
 
+/* The negative margin cancels the padding, so the header looks exactly as tight as
+   it did while the button's hit area becomes a full 24px tall — these headings are
+   the primary control in the table, and a 14px-tall target is a miss on a phone. */
 .compare-sort {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
+  padding: 5px 0;
+  margin: -5px 0;
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -1146,22 +1184,17 @@ img {
   overflow: hidden;
 }
 
+/* Scale rather than width: the fill already knows its ratio, so it can slide from
+   the length it had to the length it now has without touching layout. app.js seeds
+   the starting ratio; a bar seen for the first time grows from zero. */
 .compare-bar__fill {
   display: block;
   height: 100%;
   background: var(--grad);
   border-radius: var(--r-bar);
+  transform: scaleX(var(--fill, 1));
   transform-origin: left center;
-  animation: bar-grow 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-@keyframes bar-grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .compare-warn {
@@ -1277,10 +1310,16 @@ img {
 
 /* The metric icon sits inside the pill and inherits its colour, so it stays
    legible on both the resting state and the active charcoal fill. */
+/* The ⓘ is the part that answers the pointer, so it says so with a help cursor while
+   the pill keeps the pointer cursor that means "click to select". Padding widens what
+   there is to hit from a 12px glyph to a 20px box; the matching negative margins give
+   the space straight back, so neither the label nor the pill moves. */
 .rank-pick__icon {
   display: inline-flex;
   align-items: center;
-  margin-left: 6px;
+  margin: -4px -4px -4px 2px;
+  padding: 4px;
+  cursor: help;
   opacity: 0.6;
   transition: opacity 140ms ease-out;
 }
@@ -1415,6 +1454,9 @@ img {
   list-style: none;
 }
 
+/* A re-rank moves these rows rather than replacing them: app.js measures each row
+   before the re-render, hands it the old offset as a transform, then releases it.
+   Transform only, and will-change is applied only while the move is running. */
 .rank {
   padding: 14px 16px;
   background: var(--paper);
@@ -1512,12 +1554,6 @@ img {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .compare-bar__fill {
-    animation: none;
-  }
-}
-
 /* ---------- Station modal ---------- */
 
 body.is-modal-open {
@@ -1553,7 +1589,7 @@ body.is-modal-open {
   background: var(--paper);
   border: 1px solid var(--fog);
   border-radius: var(--r-card);
-  animation: rise 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: enter-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .modal__dialog form {
@@ -1599,6 +1635,25 @@ body.is-modal-open {
   display: block;
   max-width: 640px;
   overflow-y: auto;
+}
+
+/* Short and form-shaped: a block dialog like the guideline, but only as wide as the
+   two small numbers it holds. */
+.modal--settings .modal__dialog {
+  display: block;
+  max-width: 460px;
+}
+
+.modal--confirm .modal__dialog {
+  max-width: 420px;
+}
+
+/* The derate factors are a pair of small numbers, so they share a line. The card this
+   form used to live in took a third of the first screen to say the same thing. */
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
 }
 
 .modal__close {
@@ -1905,6 +1960,12 @@ body.is-modal-open {
   display: none;
 }
 
+/* The confirm dialog's question is the important part, so it carries body weight
+   rather than the muted grey its sibling subtitles use. */
+.modal--confirm .modal__head p {
+  color: var(--graphite);
+}
+
 /* ---------- Footer ---------- */
 
 .footer {
@@ -1913,9 +1974,24 @@ body.is-modal-open {
 }
 
 .footer p {
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
   color: var(--smoke);
+}
+
+/* A credit, not a call to action — it reads as part of the sentence and only
+   commits to being a link on hover. */
+.footer a {
+  color: var(--graphite);
+  text-decoration: underline;
+  text-decoration-color: var(--pewter);
+  text-underline-offset: 3px;
+  transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
+}
+
+.footer a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
 }
 
 /* ---------- Toast ---------- */
@@ -1942,6 +2018,26 @@ body.is-modal-open {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ---------- Reduced motion ---------- */
+
+/* The app's motion is feedback, so none of it is load-bearing: with the preference
+   set, everything resolves instantly to its final state instead of animating to it.
+   app.js also reads the same query, so the reorder and bar transitions are never
+   started rather than started-and-collapsed. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 768px) {
@@ -1959,6 +2055,16 @@ body.is-modal-open {
 
   .section-head {
     margin-bottom: 32px;
+  }
+
+  /* The card's helper text was the tallest thing above the first input on a phone:
+     one paragraph measured 189px of an 844px viewport, and the first Device field
+     sat at 872px — below the fold, so the form had to be scrolled to before it could
+     be seen at all. The copy is trimmed at the source; this keeps it from re-growing. */
+  .card__head p {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.45;
   }
 
   .results-grid {
@@ -2259,7 +2365,6 @@ body.is-modal-open {
   .toast,
   .modal,
   #calculator,
-  .eyebrow,
   .compare-card__head .btn {
     display: none !important;
   }
@@ -2300,7 +2405,7 @@ body.is-modal-open {
   .print-report__date {
     margin: 2px 0 12px;
     font-size: 11px;
-    color: #7f8491;
+    color: var(--smoke);
   }
 
   .print-report__h2 {
@@ -2314,7 +2419,7 @@ body.is-modal-open {
   .print-report__note {
     margin: -4px 0 4px;
     font-size: 10px;
-    color: #7f8491;
+    color: var(--smoke);
   }
 
   .report-table {
@@ -2368,14 +2473,14 @@ body.is-modal-open {
 
   .report-station h3 span {
     font-weight: 500;
-    color: #7f8491;
+    color: var(--smoke);
   }
 
   .report-station__status {
     margin: 0;
     font-size: 11px;
     font-weight: 600;
-    color: #7f8491;
+    color: var(--smoke);
   }
 
   .report-station__status--warn {
@@ -2452,9 +2557,11 @@ body.is-modal-open {
     padding: 6px 8px;
   }
 
+  /* Was a hardcoded copy of the Signal Green token, which is exactly how a print
+     sheet drifts away from the screen. It reads the token now. */
   .best-badge {
-    background: #059669 !important;
-    color: #ffffff !important;
+    background: var(--green) !important;
+    color: var(--paper) !important;
   }
 
   @page {

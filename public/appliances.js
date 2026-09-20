@@ -21,21 +21,22 @@
  */
 
 window.PSC_APPLIANCES = [
-  { id: 'led-bulb', name: 'LED bulb', watts: 15, min: 9, max: 15 },
+  { id: 'led-bulb', name: 'LED bulb', watts: 15, min: 9, max: 20 },
   { id: 'tube-light', name: 'Tube light', watts: 27, min: 18, max: 36 },
-  { id: 'ceiling-fan', name: 'Ceiling fan', watts: 100, min: 60, max: 75 },
-  { id: 'table-fan', name: 'Table / pedestal fan', watts: 50, min: 40, max: 60 },
+  { id: 'ceiling-fan', name: 'Ceiling fan', watts: 100, min: 60, max: 100 },
+  { id: 'table-fan', name: 'Table / pedestal fan', watts: 60, min: 40, max: 80 },
   { id: 'wifi-router', name: 'WiFi router', watts: 10, min: 5, max: 15 },
   {
     id: 'phone-charger',
     name: 'Phone charger',
     watts: 15,
     min: 5,
-    max: 45,
+    max: 15,
     note: 'A phone draws its own charging rate, not the charger rating, so 15 W is typical even with a 45 W charger.'
   },
   { id: 'laptop', name: 'Laptop', watts: 65, min: 45, max: 90 },
   { id: 'tv', name: 'TV', watts: 150, min: 60, max: 150 },
+  { id: 'monitor', name: 'Monitor', watts: 30, min: 15, max: 65 },
   {
     id: 'refrigerator',
     name: 'Refrigerator',

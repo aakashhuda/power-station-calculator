@@ -58,6 +58,19 @@
   var guidelineMask = guidelineModal.querySelector('.modal__mask');
   var guidelineCloseBtn = document.getElementById('guideline-close');
 
+  var settingsModal = document.getElementById('settings-modal');
+  var openSettingsBtn = document.getElementById('open-settings');
+  var settingsMask = settingsModal.querySelector('.modal__mask');
+  var settingsCloseBtn = document.getElementById('settings-close');
+  var settingsDoneBtn = document.getElementById('settings-done');
+
+  var confirmModal = document.getElementById('confirm-modal');
+  var confirmMask = confirmModal.querySelector('.modal__mask');
+  var confirmTitleEl = document.getElementById('confirm-title');
+  var confirmMessageEl = document.getElementById('confirm-message');
+  var confirmAcceptBtn = document.getElementById('confirm-accept');
+  var confirmCancelBtn = document.getElementById('confirm-cancel');
+
   var addForm = document.getElementById('add-station-form');
   var nameInput = document.getElementById('station-name');
   var brandInput = document.getElementById('station-brand');
@@ -307,7 +320,10 @@
     tooltipEl.textContent = text;
     tooltipEl.hidden = false;
 
-    var anchor = target.getBoundingClientRect();
+    /* A tip that names an anchor points at that anchor, so the bubble sits under the
+       ⓘ the reader is on rather than under the whole control around it. */
+    var anchorEl = target.querySelector('[data-tip-anchor]') || target;
+    var anchor = anchorEl.getBoundingClientRect();
     var box = tooltipEl.getBoundingClientRect();
     var left = anchor.left + anchor.width / 2 - box.width / 2;
     left = Math.max(12, Math.min(left, window.innerWidth - box.width - 12));
@@ -729,6 +745,47 @@
     setModalChrome();
   }
 
+  /* ---------- Confirmation ---------- */
+
+  /* One dialog answers every yes/no in the app. window.confirm cannot be styled and
+     arrives wearing the browser's clothes rather than this product's, and the two
+     places that ask a destructive question should look like each other. */
+  var confirmResolve = null;
+  var confirmReturnFocus = null;
+
+  function askConfirm(title, message, confirmLabel) {
+    /* A second question can only arrive if the first was left hanging; settle it as
+       a no rather than dropping the promise on the floor. */
+    if (confirmResolve) settleConfirm(false);
+    confirmTitleEl.textContent = title;
+    confirmMessageEl.textContent = message;
+    confirmAcceptBtn.textContent = confirmLabel;
+    confirmReturnFocus = document.activeElement;
+    confirmModal.hidden = false;
+    document.body.classList.add('is-modal-open');
+    /* Focus lands on Cancel: Enter on a dialog nobody has read yet must not delete
+       anything. */
+    confirmCancelBtn.focus();
+    return new Promise(function (resolve) { confirmResolve = resolve; });
+  }
+
+  function settleConfirm(answer) {
+    if (confirmModal.hidden) return;
+    confirmModal.hidden = true;
+    document.body.classList.remove('is-modal-open');
+    var resolve = confirmResolve;
+    var back = confirmReturnFocus;
+    confirmResolve = null;
+    confirmReturnFocus = null;
+    /* The trigger may have been re-rendered away while the question was open. */
+    if (back && back.isConnected) back.focus();
+    if (resolve) resolve(answer);
+  }
+
+  function confirmIsOpen() {
+    return !confirmModal.hidden;
+  }
+
   /* ---------- Station modal ---------- */
 
   function openStationModal() {
@@ -822,11 +879,12 @@
      running, not a promise to "generate" something already computed. */
   function updateCompareCta() {
     var n = includedStations().length;
-    var label = n ? 'Compare (' + n + ')' : 'Compare';
     var long = generateCompareBtn.querySelector('.btn__label--long');
     var short = generateCompareBtn.querySelector('.btn__label--short');
-    if (long) long.textContent = label;
-    if (short) short.textContent = label;
+    /* The count rides the long label only: four buttons now share the phone's width,
+       and "Compare (3)" is what an ellipsis would eat. */
+    if (long) long.textContent = n ? 'Compare (' + n + ')' : 'Generate Comparison';
+    if (short) short.textContent = 'Compare';
   }
 
   /* Send the user to whatever is actually blocking the comparison. */
@@ -874,13 +932,18 @@
         e.stopPropagation();
         var id = btn.dataset.removeStation;
         var station = stations.find(function (s) { return s.id === id; });
-        if (window.confirm('Delete "' + (station ? station.name : 'this station') + '"?')) {
+        askConfirm(
+          'Delete This Station?',
+          '“' + (station ? station.name : 'This station') + '” and its results will be removed from the page and from the comparison.',
+          'Delete Station'
+        ).then(function (confirmed) {
+          if (!confirmed) return;
           stations = stations.filter(function (s) { return s.id !== id; });
           save();
           if (activeStationId === id) activeStationId = stations.length ? stations[0].id : null;
           render();
           showToast('Power station deleted');
-        }
+        });
       });
     });
   }
@@ -889,9 +952,20 @@
     var station = getActiveStation();
     if (!station) {
       stationContent.innerHTML = '';
+      renderedStationId = undefined;
       return;
     }
     stationContent.innerHTML = stationSummaryHTML(station) + stationResultsHTML(station);
+    /* Switching station is the only navigation on this page, so it is the one place a
+       group entrance carries meaning. The content is rebuilt on every keystroke, so
+       the class is tied to the tab actually changing — and stays silent on the first
+       render, which is page load, not navigation. */
+    if (renderedStationId !== undefined && station.id !== renderedStationId && !motionOff()) {
+      stationContent.classList.remove('is-entering');
+      void stationContent.offsetWidth;
+      stationContent.classList.add('is-entering');
+    }
+    renderedStationId = station.id;
   }
 
   function stationSummaryHTML(station) {
@@ -917,7 +991,7 @@
     }).join('');
     return '<div class="station-summary">' +
       '<div class="station-summary__grid">' + tiles + '</div>' +
-      '<div class="progress" aria-hidden="true"><div class="progress__bar" style="width:' + pct + '%"></div></div>' +
+      '<div class="progress" aria-hidden="true"><div class="progress__bar" style="--fill:' + (pct / 100) + '"></div></div>' +
       '<div class="station-summary__actions">' +
       '<label class="shortlist">' +
       '<input type="checkbox" data-include="' + esc(station.id) + '"' + (station.included !== false ? ' checked' : '') + '>' +
@@ -937,10 +1011,36 @@
       '</div>';
   }
 
-  function tileHTML(modifier, label, value, unit, meta, statusHTML) {
+  /* ---------- Motion ---------- */
+
+  /* This is a tool, so its motion is feedback: it says that an answer moved, that a
+     list reordered, that something arrived. Everything below is driven by a diff
+     against what was on screen a moment ago, because the page rebuilds its HTML on
+     every keystroke — an entrance animation baked into the markup would replay
+     continuously and read as a flicker, which is exactly what the result tiles used
+     to do. */
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function motionOff() {
+    return reduceMotion.matches;
+  }
+
+  /* The last figure drawn for each live number, so a render can tell a real change
+     from a repaint of the same value. */
+  var lastValues = {};
+
+  function changedClass(key, value) {
+    var previous = lastValues[key];
+    lastValues[key] = value;
+    if (motionOff()) return '';
+    return previous !== undefined && previous !== value ? ' is-updated' : '';
+  }
+
+  function tileHTML(modifier, stationId, label, value, unit, meta, statusHTML) {
+    var changed = changedClass(stationId + ':' + modifier, value);
     return '<div class="result-tile result-tile--' + modifier + '">' +
       '<div class="result-tile__label">' + label + '</div>' +
-      '<div class="result-tile__value">' + value + (unit ? ' <span class="result-tile__unit">' + unit + '</span>' : '') + '</div>' +
+      '<div class="result-tile__value' + changed + '">' + value + (unit ? ' <span class="result-tile__unit">' + unit + '</span>' : '') + '</div>' +
       (meta ? '<div class="result-tile__meta">' + meta + '</div>' : '') +
       (statusHTML || '') +
       '</div>';
@@ -949,29 +1049,29 @@
   function runtimeTileHTML(station) {
     var r = station.calcs.runtime;
     if (!r.done) {
-      return tileHTML('runtime', 'Runtime', '—', '', 'Add devices to estimate', '');
+      return tileHTML('runtime', station.id, 'Runtime', '—', '', 'Add devices to estimate', '');
     }
     var over = r.loadWatts > station.continuousOutputW;
     var status = over
       ? '<div class="result-tile__status result-tile__status--warn">' + iconWarn() + ' Load exceeds output (' + fmt(station.continuousOutputW) + ' W)</div>'
       : '<div class="result-tile__status result-tile__status--ok">' + iconCheck(14) + ' Within continuous output (' + fmt(station.continuousOutputW) + ' W)</div>';
-    return tileHTML('runtime', 'Runtime', fmt(r.hours), 'hours', 'At ' + fmt(r.loadWatts) + ' W load', status);
+    return tileHTML('runtime', station.id, 'Runtime', fmt(r.hours), 'hours', 'At ' + fmt(r.loadWatts) + ' W load', status);
   }
 
   function solarTileHTML(station) {
     var c = station.calcs.solar;
     if (!c.done) {
-      return tileHTML('solar', 'Solar Recharge', '—', '', 'Add solar input', '');
+      return tileHTML('solar', station.id, 'Solar Recharge', '—', '', 'Add solar input', '');
     }
-    return tileHTML('solar', 'Solar Recharge', fmt(c.hours), 'hours', fmt(station.solarChargeW) + ' W solar × ' + fmt(solarFactor), '');
+    return tileHTML('solar', station.id, 'Solar Recharge', fmt(c.hours), 'hours', fmt(station.solarChargeW) + ' W solar × ' + fmt(solarFactor), '');
   }
 
   function acTileHTML(station) {
     var c = station.calcs.ac;
     if (!c.done) {
-      return tileHTML('ac', 'AC Recharge', '—', '', 'Add AC input', '');
+      return tileHTML('ac', station.id, 'AC Recharge', '—', '', 'Add AC input', '');
     }
-    return tileHTML('ac', 'AC Recharge', fmt(c.hours), 'hours', fmt(station.acChargeW) + ' W AC × ' + fmt(acFactor), '');
+    return tileHTML('ac', station.id, 'AC Recharge', fmt(c.hours), 'hours', fmt(station.acChargeW) + ' W AC × ' + fmt(acFactor), '');
   }
 
   /* ---------- Comparison ---------- */
@@ -1085,12 +1185,29 @@
     return scales;
   }
 
+  /* One piece of markup draws every magnitude bar, in the table and in the ranked
+     list alike — they are the same object and must never disagree about how a bar is
+     painted. The ratio is a custom property rather than a width, so the fill scales
+     on the compositor instead of driving layout. `from` is the ratio this bar had
+     last time it was drawn: the element is seeded with it and then released, which is
+     what makes a changed input read as a bar that moved. */
+  function barMarkup(pct, from) {
+    return '<span class="compare-bar" aria-hidden="true">' +
+      '<span class="compare-bar__fill" style="--fill:' + (pct / 100) + '"' +
+      (from === undefined ? '' : ' data-from="' + from + '"') +
+      '></span></span>';
+  }
+
+  var barRatios = {};
+
   function barHTML(station, key, max) {
     var value = compareValue(station, key);
     if (!(max > 0) || !(value > 0)) return '';
     var pct = Math.max(3, Math.round(value / max * 100));
-    return '<span class="compare-bar" aria-hidden="true">' +
-      '<span class="compare-bar__fill" style="width:' + pct + '%"></span></span>';
+    var id = station.id + '|' + key;
+    var from = barRatios[id];
+    barRatios[id] = pct;
+    return barMarkup(pct, from === undefined ? 0 : from);
   }
 
   function sortedIncludedStations() {
@@ -1213,14 +1330,17 @@
     var metrics = RANK_METRICS.map(function (m) {
       var hint = columnHint(m.key);
       var text = m.label + ' — ' + hint;
-      /* The icon sits inside the pill, so the pill itself is the tooltip trigger.
-         A button cannot contain another focusable element, so the icon is purely
-         decorative and the explanation rides on the button's accessible name. */
+      /* The explanation belongs to the ⓘ, not to the pill. The pill is a button that
+         already says what it does, and raising a bubble every time the pointer crosses
+         it turns a row of controls into a row of pop-ups — so the icon is marked as
+         the pointer's target with data-tip-anchor. The text stays on the button as
+         well, because a button cannot hold a second focusable element and keyboard
+         focus and assistive tech still need to reach it. */
       return '<button type="button" class="rank-pick' + (m.key === rankedMetric ? ' is-active' : '') +
         '" data-metric="' + m.key + '"' +
         (hint ? ' data-tip="' + esc(text) + '" aria-label="' + esc(text) + '"' : '') +
         '>' + esc(m.label) +
-        (hint ? '<span class="rank-pick__icon" aria-hidden="true">' + iconInfo(12) + '</span>' : '') +
+        (hint ? '<span class="rank-pick__icon" data-tip-anchor aria-hidden="true">' + iconInfo(12) + '</span>' : '') +
         '</button>';
     }).join('');
     return '<div class="compare-rank__controls">' +
@@ -1235,9 +1355,15 @@
   /* Always rendered; CSS decides whether the card is currently showing it. */
   function rankedHTML() {
     var metric = RANK_METRICS.filter(function (m) { return m.key === rankedMetric; })[0] || RANK_METRICS[0];
-    var list = includedStations().filter(function (s) { return compareValue(s, metric.key) !== null; });
+    /* Every included station is listed, including one with nothing to show for this
+       metric — a station with no price, most often. Filtering those out made the
+       ranked list disagree with the table about which stations exist, and on a phone
+       the ranked list *is* the comparison. Such a row states a dash and sorts to the
+       bottom without taking a placing, exactly as a blank cell does in the table. */
+    var list = includedStations().slice();
+    var valued = list.filter(function (s) { return compareValue(s, metric.key) !== null; });
 
-    if (!list.length) {
+    if (!valued.length) {
       return '<div class="compare-rank"><p class="compare-check__lead">Nothing to rank yet — ' +
         esc(metric.label.toLowerCase()) + ' is unavailable for the included stations.</p></div>';
     }
@@ -1245,24 +1371,29 @@
     list.sort(function (a, b) {
       var av = compareValue(a, metric.key);
       var bv = compareValue(b, metric.key);
+      /* Blanks sink whichever way the metric points. */
+      if (av === null && bv === null) return 0;
+      if (av === null) return 1;
+      if (bv === null) return -1;
       return metric.better === 'high' ? bv - av : av - bv;
     });
 
-    var values = list.map(function (s) { return compareValue(s, metric.key); });
+    var values = valued.map(function (s) { return compareValue(s, metric.key); });
     var max = Math.max.apply(null, values);
     var showBars = max > Math.min.apply(null, values);
     var best = bestValues();
+    var place = 0;
 
-    var rows = list.map(function (s, i) {
+    var rows = list.map(function (s) {
       var value = compareValue(s, metric.key);
-      var marked = BEST_KEYS.some(function (b) { return b.key === metric.key; }) && isBestCell(s, metric.key, best);
-      var bar = showBars
-        ? '<span class="compare-bar" aria-hidden="true"><span class="compare-bar__fill" style="width:' +
-          Math.max(3, Math.round(value / max * 100)) + '%"></span></span>'
-        : '';
-      return '<li class="rank">' +
+      if (value !== null) place++;
+      var marked = value !== null && BEST_KEYS.some(function (b) { return b.key === metric.key; }) && isBestCell(s, metric.key, best);
+      /* No origin here: the ranked list already says what moved by sliding its rows,
+         and a bar gliding at the same time would be two answers to one question. */
+      var bar = showBars && value !== null ? barMarkup(Math.max(3, Math.round(value / max * 100))) : '';
+      return '<li class="rank" data-rank="' + esc(s.id) + '">' +
         '<div class="rank__top">' +
-        '<span class="rank__pos">' + (i + 1) + '</span>' +
+        '<span class="rank__pos">' + (value === null ? '–' : place) + '</span>' +
         '<span class="rank__name">' + esc(s.name) + '</span>' +
         '<span class="rank__value' + (marked ? ' is-best' : '') + '">' + compareText(s, metric.key) + '</span>' +
         '</div>' +
@@ -1310,7 +1441,108 @@
       '</div>';
   }
 
+  /* Which of the four things the comparison section can be showing, so a render can
+     tell that it has just become available. */
+  var compareState = null;
+  var renderedStationId;
+
+  function comparisonState() {
+    if (stations.length === 0) return 'empty';
+    var list = includedStations();
+    if (!list.length) return 'excluded';
+    return list.every(function (s) { return countDone(s) === CALC_IDS.length; }) ? 'ready' : 'locked';
+  }
+
+  /* The ranked rows, keyed by station, measured where they are right now. */
+  function rankPositions() {
+    var positions = {};
+    Array.prototype.forEach.call(compareArea.querySelectorAll('.rank[data-rank]'), function (el) {
+      positions[el.dataset.rank] = el.getBoundingClientRect().top;
+    });
+    return positions;
+  }
+
+  /* FLIP: hand each row the distance it has to travel, let it render there for one
+     frame, then release it so the transition carries it home. Without this a
+     re-rank is a jump cut and the reader has to re-read the whole list to see what
+     changed. */
+  function playReorder(positions) {
+    var moved = [];
+    Array.prototype.forEach.call(compareArea.querySelectorAll('.rank[data-rank]'), function (el) {
+      var was = positions[el.dataset.rank];
+      if (was === undefined) return;
+      var delta = was - el.getBoundingClientRect().top;
+      if (Math.abs(delta) < 2) return;
+      el.style.transition = 'none';
+      el.style.transform = 'translateY(' + delta + 'px)';
+      el.style.willChange = 'transform';
+      moved.push(el);
+    });
+    if (!moved.length) return;
+    void compareArea.offsetWidth;
+    requestAnimationFrame(function () {
+      moved.forEach(function (el) {
+        el.style.transition = 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.transform = '';
+      });
+      /* A plain timeout rather than transitionend: the whole card is replaced on the
+         next keystroke, and the cleanup must not depend on the animation finishing. */
+      setTimeout(function () {
+        moved.forEach(function (el) { el.style.transition = ''; el.style.willChange = ''; });
+      }, 400);
+    });
+  }
+
+  function settleBars() {
+    var fills = Array.prototype.slice.call(compareArea.querySelectorAll('.compare-bar__fill[data-from]'));
+    if (!fills.length) return;
+    /* A render where no bar changed length is the common case — typing backup hours
+       does not touch them — and it must cost nothing: no reflow, no frame. */
+    var moving = fills.filter(function (el) {
+      return Number(el.dataset.from) !== Math.round(Number(el.style.getPropertyValue('--fill')) * 100);
+    });
+    if (motionOff() || !moving.length) {
+      /* Nothing to play, but the "where this came from" mark must not be left
+         standing, or the next render would read a stale origin. */
+      fills.forEach(function (el) { delete el.dataset.from; });
+      return;
+    }
+    fills.forEach(function (el) {
+      el.style.transition = 'none';
+      el.style.transform = 'scaleX(' + (Number(el.dataset.from) / 100) + ')';
+    });
+    void compareArea.offsetWidth;
+    requestAnimationFrame(function () {
+      fills.forEach(function (el) {
+        el.style.transition = '';
+        el.style.transform = '';
+        delete el.dataset.from;
+      });
+    });
+  }
+
+  function markComparisonArrival() {
+    var card = compareArea.querySelector('.compare-card');
+    if (!card) return;
+    card.classList.add('is-arriving');
+    setTimeout(function () { card.classList.remove('is-arriving'); }, 700);
+  }
+
+  /* Wraps the render so motion can be decided by what changed across it. */
   function renderComparison() {
+    var positions = motionOff() ? null : rankPositions();
+    var was = compareState;
+    compareState = comparisonState();
+    renderComparisonNow();
+    if (positions) playReorder(positions);
+    settleBars();
+    if (motionOff()) return;
+    /* Deliberately silent on the first render: a returning visitor already knows what
+       is in the comparison, and page load is not the moment to perform it. */
+    if (compareState === 'ready' && was !== null && was !== 'ready') markComparisonArrival();
+  }
+
+  function renderComparisonNow() {
     hideTooltip();
     if (stations.length === 0) {
       compareHint.textContent = 'Add a power station and complete the shared inputs to generate the comparison.';
@@ -1576,13 +1808,25 @@
         '<td class="device-cell" data-label="Watts (W) *"><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' +
         (wattsClasses.length ? ' class="' + wattsClasses.join(' ') + '"' : '') +
         (d.est === true ? ' data-tip="' + esc(applianceTip(d)) + '"' : '') + '></td>' +
-        '<td class="device-cell" data-label="Hours (h)"><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' +
+        '<td class="device-cell" data-label="Hours (h, Optional)"><input type="number" data-field="hours" value="' + esc(d.hours) + '" min="0" step="0.5" placeholder="5" inputmode="decimal"' +
         (isInvalidNumber('hours', d.hours) ? ' class="is-invalid"' : '') + (sameHours ? ' readonly' : '') + '></td>' +
         '<td class="device-cell" data-label="Energy (Wh)" data-wh>—</td>' +
         '<td class="device-cell device-cell--remove"><button type="button" class="device-remove" data-remove="' + i + '" aria-label="Remove device">' + iconTrash() + '</button></td>' +
         '</tr>';
     }).join('');
     updateDeviceLegend();
+  }
+
+  /* The two figures the device card is built around are updated in place rather than
+     re-rendered, so their mark is applied and released here instead of coming free
+     with a fresh element. Restarting the animation needs the reflow. */
+  function setLiveFigure(el, text) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    if (motionOff()) return;
+    el.classList.remove('is-updated');
+    void el.offsetWidth;
+    el.classList.add('is-updated');
   }
 
   function updateDeviceUI() {
@@ -1601,8 +1845,8 @@
         if (hoursInput && hoursInput.value !== String(d.hours)) hoursInput.value = d.hours;
       }
     });
-    dailyWattsEl.textContent = fmt(dailyTotals.totalWatts) + ' W';
-    dailyWhEl.textContent = fmt(dailyTotals.totalWh) + ' Wh';
+    setLiveFigure(dailyWattsEl, fmt(dailyTotals.totalWatts) + ' W');
+    setLiveFigure(dailyWhEl, fmt(dailyTotals.totalWh) + ' Wh');
     /* Both hints depend on the recomputed totals, and typing hours changes them
        without rebuilding the rows — so refresh them here, not only on a render. */
     updateDeviceLegend();
@@ -1898,6 +2142,35 @@
     guidelineMask.addEventListener('click', closeGuideline);
     guidelineCloseBtn.addEventListener('click', closeGuideline);
 
+    function closeSettings() {
+      settingsModal.hidden = true;
+      document.body.classList.remove('is-modal-open');
+      if (openSettingsBtn.isConnected) openSettingsBtn.focus();
+    }
+
+    openSettingsBtn.addEventListener('click', function () {
+      settingsModal.hidden = false;
+      document.body.classList.add('is-modal-open');
+      currencyInput.focus();
+    });
+
+    settingsMask.addEventListener('click', closeSettings);
+    settingsCloseBtn.addEventListener('click', closeSettings);
+    settingsDoneBtn.addEventListener('click', closeSettings);
+
+    confirmCancelBtn.addEventListener('click', function () { settleConfirm(false); });
+    confirmAcceptBtn.addEventListener('click', function () { settleConfirm(true); });
+    confirmMask.addEventListener('click', function () { settleConfirm(false); });
+
+    /* Escape closes anything that is only being read or chosen between — never the
+       station form, where it would throw away typing with no way back. */
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (confirmIsOpen()) { settleConfirm(false); return; }
+      if (!settingsModal.hidden) { closeSettings(); return; }
+      if (!guidelineModal.hidden) closeGuideline();
+    });
+
     generateCompareBtn.addEventListener('click', function () {
       var list = includedStations();
       if (!list.length) {
@@ -1971,8 +2244,18 @@
        A pinned choice is left alone. */
     /* Delegated on document: the comparison is rebuilt on every keystroke, so
        per-element binding would have to be redone constantly. */
+    /* A tip that names an anchor answers to the pointer only while the pointer is on
+       that anchor; everywhere else on the control is just the control. */
+    function tipForPointer(node) {
+      var tip = node.closest('[data-tip]');
+      if (!tip) return null;
+      var anchor = tip.querySelector('[data-tip-anchor]');
+      if (anchor && !anchor.contains(node)) return null;
+      return tip;
+    }
+
     document.addEventListener('mouseover', function (e) {
-      var tip = e.target.closest('[data-tip]');
+      var tip = tipForPointer(e.target);
       if (tip === tooltipTarget) return;
       if (tip) { tooltipTarget = tip; showTooltip(tip); } else { hideTooltip(); }
     });
@@ -1983,11 +2266,19 @@
       hideTooltip();
     });
 
-    /* Focus covers keyboard users and taps, which is how the tooltip is reached
-       on a touch screen. */
+    /* Focus covers keyboard users and taps, which is how the tooltip is reached on a
+       touch screen. Where a tip names a pointer anchor, though, a mouse click on the
+       control must not leave the explanation pinned open behind it — so on a device
+       that can hover, only focus the browser itself considers keyboard-driven counts.
+       Touch is deliberately left alone: it has no hover, so focus is the only way in. */
+    var canHover = window.matchMedia('(hover: hover)');
+
     document.addEventListener('focusin', function (e) {
       var tip = e.target.closest('[data-tip]');
-      if (tip) { tooltipTarget = tip; showTooltip(tip); }
+      if (!tip) return;
+      if (tip.querySelector('[data-tip-anchor]') && canHover.matches && !e.target.matches(':focus-visible')) return;
+      tooltipTarget = tip;
+      showTooltip(tip);
     });
 
     document.addEventListener('focusout', hideTooltip);
@@ -2022,7 +2313,12 @@
         showToast('Nothing to clear');
         return;
       }
-      if (window.confirm('Clear all power stations, devices, and calculations?')) {
+      askConfirm(
+        'Clear Everything?',
+        'This removes every power station, every device, and all of the calculations built from them. There is no undo.',
+        'Clear Everything'
+      ).then(function (confirmed) {
+        if (!confirmed) return;
         stations = [];
         devices = [blankDevice()];
         solarFactor = 1.2;
@@ -2039,7 +2335,7 @@
         save();
         render();
         showToast('All data cleared');
-      }
+      });
     });
 
     addForm.addEventListener('submit', function (e) {
@@ -2127,6 +2423,19 @@
     });
   }
 
+  /* The brand shimmer repaints a background position every frame. It earns that while
+     the heading is on screen and earns nothing once it is not — and the comparison,
+     which is what the page is actually for, sits well below it. */
+  function bindBrandShimmer() {
+    var mark = document.querySelector('.grad');
+    if (!mark || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        mark.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+      });
+    }, { threshold: 0 }).observe(mark);
+  }
+
   /* ---------- Init ---------- */
 
   function init() {
@@ -2138,6 +2447,7 @@
     recomputeAll();
     updateDeviceUI();
     bindGlobalEvents();
+    bindBrandShimmer();
 
     if (catalogBrands().length) {
       resetCatalogSearch();
