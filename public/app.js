@@ -1452,8 +1452,10 @@
   /* ---------- Appliance dropdown ---------- */
 
   /* A native <datalist> cannot be opened by script, so it only ever appeared once
-     the user started typing. This is a small listbox instead: it opens on hover or
-     focus of an empty Device field, and filters as the user types. */
+     the user started typing. This is a small listbox instead: it opens when an
+     empty Device field takes focus, and filters as the user types. Focus — not
+     hover — is the trigger, because hovering fired while the pointer merely
+     travelled across a row and the list then had to guess when to close. */
   var menuInput = null;
   var menuIndex = -1;
 
@@ -1497,10 +1499,13 @@
     if (renderApplianceMenu(input.value) === 0) { closeApplianceMenu(); return; }
     menuInput = input;
     applianceMenu.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
     positionApplianceMenu(input);
   }
 
   function closeApplianceMenu() {
+    /* The field owns the list, so it is also what reports the list as collapsed. */
+    if (menuInput) menuInput.setAttribute('aria-expanded', 'false');
     menuInput = null;
     menuIndex = -1;
     applianceMenu.hidden = true;
@@ -1527,6 +1532,15 @@
 
   function menuIsOpenFor(input) {
     return menuInput === input;
+  }
+
+  /* The list is fixed, so a scroll leaves it hanging where the field used to be.
+     Only a field that has actually left the viewport is worth dismissing — a
+     scroll of a pixel or two, which is what focusing a field on a phone causes,
+     should just carry the list along with it. */
+  function inputIsOffScreen(input) {
+    var box = input.getBoundingClientRect();
+    return box.bottom <= 0 || box.top >= window.innerHeight;
   }
 
   function updateDeviceLegend() {
@@ -1557,7 +1571,7 @@
       if (isInvalidNumber('watts', d.watts)) wattsClasses.push('is-invalid');
       if (d.est === true) wattsClasses.push('is-est');
       return '<tr data-device="' + i + '">' +
-        '<td class="device-cell device-cell--name"><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Type or pick a device" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"></td>' +
+        '<td class="device-cell device-cell--name"><input type="text" data-field="name" value="' + esc(d.name) + '" placeholder="Type or pick a device" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="appliance-menu" aria-autocomplete="list"></td>' +
         '<td class="device-cell device-table__qty" data-label="Qty *"><input type="number" data-field="qty" value="' + esc(d.qty) + '" min="1" step="1" placeholder="1" inputmode="numeric"' + (isInvalidNumber('qty', d.qty) ? ' class="is-invalid"' : '') + '></td>' +
         '<td class="device-cell" data-label="Watts (W) *"><input type="number" data-field="watts" value="' + esc(d.watts) + '" min="0" step="0.5" placeholder="100" inputmode="decimal"' +
         (wattsClasses.length ? ' class="' + wattsClasses.join(' ') + '"' : '') +
@@ -1673,26 +1687,38 @@
       return target && target.closest ? target.closest('input[data-field="name"]') : null;
     }
 
-    deviceRows.addEventListener('mouseover', function (e) {
-      var input = nameInputOf(e.target);
-      /* Hovering only offers the list while the field is still empty, so it never
-         covers a device the user has already chosen. */
-      if (!input || input.value.trim() !== '' || menuIsOpenFor(input)) return;
-      openApplianceMenu(input);
-    });
-
-    deviceRows.addEventListener('mouseout', function (e) {
-      var input = nameInputOf(e.target);
-      if (!input) return;
-      /* Grace period so the pointer can travel from the field into the list. */
-      setTimeout(function () {
-        if (menuIsOpenFor(input) && !applianceMenu.matches(':hover')) closeApplianceMenu();
-      }, 180);
-    });
-
+    /* Focusing an empty Device field offers the list; a field that already names
+       a device is left alone, so the list never covers a choice already made. The
+       else branch settles the state for a field that has text, which is what stops
+       a list opened for the previous row from surviving the move. */
     deviceRows.addEventListener('focusin', function (e) {
       var input = nameInputOf(e.target);
+      if (!input) return;
+      if (input.value.trim() === '') openApplianceMenu(input);
+      else closeApplianceMenu();
+    });
+
+    /* Clicking back into an empty field offers the list again. Focus alone cannot
+       do this: a field that already holds focus fires no focusin, so a list
+       dismissed with Escape could not otherwise be brought back without first
+       leaving the field. mousedown rather than click, so the list is in place
+       before the press finishes. */
+    deviceRows.addEventListener('mousedown', function (e) {
+      var input = nameInputOf(e.target);
       if (input && input.value.trim() === '') openApplianceMenu(input);
+    });
+
+    /* Focus opens the list, so focus has to close it as well — otherwise tabbing
+       or clicking out of the field would leave the list floating over the page. */
+    deviceRows.addEventListener('focusout', function (e) {
+      var input = nameInputOf(e.target);
+      if (!input || !menuIsOpenFor(input)) return;
+      /* Reading activeElement after the event: a click on an option is a mousedown
+         on the list, which is prevented from taking focus, so focus is still here
+         and the list stays open for the handler above to use. */
+      setTimeout(function () {
+        if (menuIsOpenFor(input) && document.activeElement !== input) closeApplianceMenu();
+      }, 0);
     });
 
     deviceRows.addEventListener('keydown', function (e) {
@@ -1725,7 +1751,23 @@
       closeApplianceMenu();
     });
 
-    window.addEventListener('scroll', closeApplianceMenu, true);
+    /* A scroll moves the field out from under a fixed list, so the list is carried
+       along with it and only dismissed once the field has genuinely left the
+       viewport. Two things make that the right shape: the list's own scrollbar is
+       how the longer appliance list is read, and focusing a field that sits below
+       the fold makes the browser scroll to it — so judging the field on the first
+       scroll event, before that scroll has finished, closed the list the moment it
+       was opened. Hence the settle timer. */
+    var scrollSettle;
+    window.addEventListener('scroll', function (e) {
+      if (e.target === applianceMenu || applianceMenu.contains(e.target)) return;
+      if (!menuInput) return;
+      positionApplianceMenu(menuInput);
+      clearTimeout(scrollSettle);
+      scrollSettle = setTimeout(function () {
+        if (menuInput && inputIsOffScreen(menuInput)) closeApplianceMenu();
+      }, 200);
+    }, true);
 
     deviceRows.addEventListener('input', function (e) {
       var row = e.target.closest('tr[data-device]');

@@ -108,3 +108,63 @@ Verified against a headless-Chromium run (Node built-ins only — no packages
 installed): 42/42 layout + behaviour checks and 16/16 edge-case checks
 (320/360/390/480/640px, desktop, print emulation at A4 content width, fresh
 and legacy localStorage, locked comparison state, station modal).
+
+## Follow-up — Improvements 5 (inline request)
+
+Source: inline request. Branch: `fix/appliance-list-focus-guideline-info`.
+Status: Implemented — verified with a headless-Chromium smoke test (48 desktop +
+15 mobile checks, all passing, no console errors). Awaiting user browser review +
+commit permission.
+
+### 1. Appliance list opens on focus, not hover
+
+The Device cell's appliance list was driven by `mouseover`/`mouseout` with a
+180 ms grace timer, so it opened whenever the pointer merely crossed a row and
+then had to guess when to close. It is now driven by focus:
+
+- `focusin` on an empty Device field opens the list; a field that already names
+  a device closes it, so a list opened for the previous row cannot survive a move.
+- `mousedown` on an empty field re-offers a list dismissed with Escape — a field
+  that already holds focus fires no `focusin`, so focus alone would dead-end.
+- `focusout` closes the list, with the option `mousedown` (which is prevented
+  from taking focus) left alone.
+- The `mouseover`/`mouseout` handlers are gone. CSS `:hover` on the options is
+  kept, so the pointer still highlights a row of the list.
+
+Two further defects in the same code path, both found by the mobile pass:
+
+- **Scroll closed the list it had just opened.** A fixed list has to be
+  repositioned when the page scrolls, not dismissed — and focusing a Device field
+  below the fold makes the browser scroll to it, so the list vanished the instant
+  it appeared. The list now follows its field on scroll and is dismissed only once
+  the field has left the viewport, checked after the scroll settles (200 ms). A
+  scroll of the list's own scrollbar was also closing it, which made the lower
+  appliances unreachable.
+- **`aria-expanded` was hard-coded to `false`.** It now tracks the list, and the
+  combobox points at the listbox with `aria-controls="appliance-menu"`.
+
+### 2. Guideline modal — missing information added
+
+The modal already documented the appliance list and the shared backup time, so
+the audit added what was genuinely absent:
+
+- **Qty column** — new "Running More Than One of the Same Device" section:
+  Watts × Qty for load, Watts × Qty × Hours for energy, blank counts as one,
+  whole numbers only.
+- **Appliance list** — now says the list appears when the cursor lands in an empty
+  Device field, filters as you type, is driven by arrow keys + Enter, is dismissed
+  with Escape or by leaving the field, and sets Qty to 1 when it fills the Watts.
+- **Shared backup time** — names the "Backup time (h)" field the number goes in.
+- **Add Device / bin icon** — new "Adding, Removing and Typing Rows" section,
+  including that an invalid entry is outlined and left out of the totals.
+- **Station tabs** — the 0/3 counter and the × that deletes a station.
+- **Catalog prices** — filled in only while the currency is Tk (BDT listing);
+  an already-added model is tagged "Added".
+- **Locked comparison** — the missing-input checklist and its "Go" buttons.
+
+### Done when
+
+- An empty Device field shows the list on focus at desktop and phone widths, and
+  the list stays put while the page scrolls.
+- Every element the page renders is described somewhere in the Guideline modal.
+- No console errors; existing localStorage data loads unchanged.
